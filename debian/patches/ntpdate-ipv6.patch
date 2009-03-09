@@ -1,0 +1,16 @@
+bug #249216
+
+Index: ntp-4.2.4p0+dfsg/ntpdate/ntpdate.c
+===================================================================
+--- ntp-4.2.4p0+dfsg.orig/ntpdate/ntpdate.c	2007-04-10 10:48:06.000000000 +0200
++++ ntp-4.2.4p0+dfsg/ntpdate/ntpdate.c	2007-04-10 10:48:35.000000000 +0200
+@@ -1757,8 +1757,7 @@
+ 	   if (res->ai_family == AF_INET6)
+ 		if (setsockopt(fd[nbsock], IPPROTO_IPV6, IPV6_V6ONLY, (void*) &optval, sizeof(optval)) < 0) {
+ 			   netsyslog(LOG_ERR, "setsockopt() IPV6_V6ONLY failed: %m");
+-			   exit(1);
+-			   /*NOTREACHED*/
++			   /* exit(1); */
+ 		}
+ #endif
+ 

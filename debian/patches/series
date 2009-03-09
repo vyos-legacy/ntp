@@ -1,0 +1,14 @@
+dfsg.patch
+includes.patch
+ntptimeval.patch
+ntpdate-ipv6.patch
+ntpd-char-fix.patch
+ntpd-linux-caps.patch
+ntptrace-getopt.patch
+doc.patch
+ntpd-ni-maxhost.patch
+no-ipv6-fix.patch
+openssl-disable-check.patch
+libedit.patch
+CVE-2009-0021.patch
+autotools.patch

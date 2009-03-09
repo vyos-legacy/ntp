@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -e
+
+installinit_error() {
+	exit $?
+}
+
+#DEBHELPER#
+
+if [ "$1" = "purge" ]; then
+	deluser --system --quiet ntp || true
+	rm -f /etc/ntp.conf.dhcp
+	rm -rf /var/lib/ntp/
+	rm -rf /var/log/ntpstats/
+fi

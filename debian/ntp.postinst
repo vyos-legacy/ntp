@@ -1,0 +1,14 @@
+#!/bin/sh
+
+set -e
+
+if [ "$1" = "configure" ]; then
+	adduser --system --quiet --group --no-create-home ntp || :
+	chown -R ntp:ntp /var/lib/ntp /var/log/ntpstats
+fi
+
+installinit_error() {
+	exit $?
+}
+
+#DEBHELPER#

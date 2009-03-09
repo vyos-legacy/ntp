@@ -1,0 +1,22 @@
+Fix support for systems without ntptimeval (bug #50433, http://bugs.ntp.org/979)
+
+Index: ntp-4.2.2+dfsg/include/ntp_syscall.h
+===================================================================
+--- ntp-4.2.2+dfsg.orig/include/ntp_syscall.h	2004-02-25 05:57:56.000000000 +0000
++++ ntp-4.2.2+dfsg/include/ntp_syscall.h	2006-07-02 14:25:13.000000000 +0000
+@@ -24,6 +24,15 @@
+ 
+ #  define ntp_adjtime(t)	__adjtimex((t))
+ 
++#ifndef HAVE_STRUCT_NTPTIMEVAL
++struct ntptimeval
++{
++  struct timeval time;  /* current time (ro) */
++  long int maxerror;    /* maximum error (us) (ro) */
++  long int esterror;    /* estimated error (us) (ro) */
++};
++#endif
++
+ static inline int
+ ntp_gettime(
+ 	struct ntptimeval *ntv
