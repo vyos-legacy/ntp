@@ -1777,8 +1777,7 @@ init_io(void)
 		if (res->ai_family == AF_INET6)
 			if (setsockopt(fd[nbsock], IPPROTO_IPV6, IPV6_V6ONLY, (void*) &optval, sizeof(optval)) < 0) {
 				   netsyslog(LOG_ERR, "setsockopt() IPV6_V6ONLY failed: %m");
-					exit(1);
-					/*NOTREACHED*/
+				   /* exit(1); */
 		}
 #endif
 
