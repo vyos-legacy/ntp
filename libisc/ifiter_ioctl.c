@@ -110,6 +110,7 @@ struct isc_interfaceiter {
 #  define IF_NAMESIZE 16
 # endif
 #endif
+#include <linux/if_addr.h>
 #endif
 
 static isc_result_t
@@ -479,6 +480,10 @@ linux_if_inet6_current(isc_interfaceiter_t *iter) {
 			      "/proc/net/if_inet6:strlen(%s) != 32", address);
 		return (ISC_R_FAILURE);
 	}
+	/* Ignore DAD addresses -- can't bind to them till resolved */
+	if (flags & IFA_F_TENTATIVE)
+		return (ISC_R_IGNORE);
+
 	for (i = 0; i < 16; i++) {
 		unsigned char byte;
 		static const char hex[] = "0123456789abcdef";
