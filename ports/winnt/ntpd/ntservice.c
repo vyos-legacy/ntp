@@ -26,6 +26,7 @@
 #include "ntservice.h"
 #include "clockstuff.h"
 #include "ntp_iocompletionport.h"
+#include "isc/win32os.h"
 #ifdef DEBUG
 #include <crtdbg.h>
 #endif
@@ -37,6 +38,7 @@ static char ConsoleTitle[128];
 static int glb_argc;
 static char **glb_argv;
 HANDLE hServDoneEvent = NULL;
+int accept_wildcard_if_for_winnt;
 extern volatile int debug;
 extern char *progname;
 
@@ -50,8 +52,17 @@ void ntservice_exit(void);
 
 void WINAPI service_main( DWORD argc, LPTSTR *argv )
 {
-  /* pass the global command line options on to the service */
-  ntpdmain( glb_argc, glb_argv );
+	if ( argc > 1 )
+	{
+		/*
+		 * Let command line parameters from the Windows SCM GUI
+		 * override the standard parameters from the ImagePath registry key.
+		 */
+		glb_argc = argc;
+		glb_argv = argv;
+	}
+
+	ntpdmain( glb_argc, glb_argv );
 }
 
 
@@ -69,7 +80,12 @@ int main( int argc, char *argv[] )
 	glb_argc = argc;
 	glb_argv = argv;
 
-	/* Command line users should put -f in the options */
+	/* Under original Windows NT we must not discard the wildcard */
+	/* socket to workaround a bug in NT's getsockname(). */
+	if ( isc_win32os_majorversion() <= 4 )
+		accept_wildcard_if_for_winnt = 1;
+
+	/* Command line users should put -n in the options */
 	while (argv[i]) {
 		if (!_strnicmp(argv[i], "-d", 2) ||
 			!strcmp(argv[i], "-q") ||
