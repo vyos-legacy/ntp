@@ -27,8 +27,8 @@
 #endif /* SYS_WINNT */
 
 #if defined(HAVE_LIBREADLINE) || defined (HAVE_LIBEDIT)
-# include <readline/readline.h>
-# include <readline/history.h>
+# include <editline/readline.h>
+# include <editline/history.h>
 #endif /* HAVE_LIBREADLINE || HAVE_LIBEDIT */
 
 #ifdef SYS_VXWORKS

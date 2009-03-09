@@ -338,8 +338,8 @@ AC_CHECK_LIB(md5, MD5Init, ,
   AC_CHECK_LIB(md, MD5Init))
 AC_CHECK_FUNCS(MD5Init)
 dnl HMS: What a hack...
-AC_CHECK_HEADERS(readline/history.h readline/readline.h)
-case "$ac_cv_header_readline_history_h$ac_cv_header_readline_readline_h" in
+AC_CHECK_HEADERS(editline/history.h editline/readline.h)
+case "$ac_cv_header_editline_history_h$ac_cv_header_editline_readline_h" in
  *no*) ;;
  *) save_LIBS=$LIBS
     LIBS=
