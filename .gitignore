@@ -19,3 +19,4 @@ config.status
 libtool
 .gcc-warning
 *.loT
+autom4te.cache
