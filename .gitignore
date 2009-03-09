@@ -1,0 +1,11 @@
+*.o
+*.a
+stamp-h1
+*.l[ao]
+*.log
+Makefile
+build-stamp
+config.h
+config.status
+libtool
+.gcc-warning
