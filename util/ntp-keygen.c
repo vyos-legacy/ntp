@@ -255,20 +255,8 @@ main(
 #endif
 
 #ifdef OPENSSL
-	/*
-	 * OpenSSL version numbers: MNNFFPPS: major minor fix patch status
-	 * We match major, minor, fix and status (not patch)
-	 */
-	if ((SSLeay() ^ OPENSSL_VERSION_NUMBER) & ~0xff0L) {
-		fprintf(stderr,
-		    "OpenSSL version mismatch. Built against %lx, you have %lx\n",
-		    OPENSSL_VERSION_NUMBER, SSLeay());
-		return (-1);
-
-	} else {
-		fprintf(stderr,
-		    "Using OpenSSL version %lx\n", SSLeay());
-	}
+	fprintf(stderr,
+	    "Using OpenSSL version %lx\n", SSLeay());
 #endif /* OPENSSL */
 
 	/*

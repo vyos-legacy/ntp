@@ -508,15 +508,6 @@ ntpdmain(
 	}
 #endif
 
-#ifdef OPENSSL
-	if ((SSLeay() ^ OPENSSL_VERSION_NUMBER) & ~0xff0L) {
-		msyslog(LOG_ERR,
-		    "ntpd: OpenSSL version mismatch. Built against %lx, you have %lx\n",
-		    OPENSSL_VERSION_NUMBER, SSLeay());
-		exit(1);
-	}
-#endif
-
 	/* getstartup(argc, argv); / * startup configuration, may set debug */
 
 #ifdef DEBUG
