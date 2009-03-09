@@ -1,4 +1,11 @@
-ntp (1:4.2.5p6+vyatta-1) unstable; urgency=low
+ntp (1:4.2.4p6+vyatta-2) unstable; urgency=low
+
+  * Enable debugging
+  * Ignore tentative IPV6 interfaces
+
+ -- Stephen Hemminger <shemminger@vyatta.com>  Mon, 09 Mar 2009 14:40:52 -0700
+
+ntp (1:4.2.4p6+vyatta-1) unstable; urgency=low
 
   * Merge in Debian 4.2.4p4 and upstream 4.2.4p6
 
