@@ -156,11 +156,11 @@ static	void	doconfigure	P((int));
 struct ntp_res_t_pkt {		/* Tagged packet: */
 	void *tag;		/* For the caller */
 	u_int32 paddr;		/* IP to look up, or 0 */
-	char name[MAXHOSTNAMELEN]; /* Name to look up (if 1st byte is not 0) */
+        char *name;             /* Name to look up (if 1st byte is not 0) */
 };
 
 struct ntp_res_c_pkt {		/* Control packet: */
-	char name[MAXHOSTNAMELEN];
+	char *name;
 	u_int32 paddr;
 	int mode;
 	int version;
