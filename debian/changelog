@@ -1,3 +1,9 @@
+ntp (1:4.2.5p6+vyatta-1) unstable; urgency=low
+
+  * Merge in Debian 4.2.4p4 and upstream 4.2.4p6
+
+ -- Stephen Hemminger <shemminger@vyatta.com>  Mon, 09 Mar 2009 11:56:30 -0700
+
 ntp (1:4.2.4p4+dfsg-8) unstable; urgency=low
 
   * It did not properly check the return value of EVP_VerifyFinal
