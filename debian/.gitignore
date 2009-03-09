@@ -1,2 +1,6 @@
 ntp
 ntpdate
+files
+ntp-doc
+*.debhelper
+*.substvars
