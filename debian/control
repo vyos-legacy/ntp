@@ -1,10 +1,9 @@
 Source: ntp
 Section: net
 Priority: optional
-Maintainer: Debian NTP Team <pkg-ntp-maintainers@lists.alioth.debian.org>
-Uploaders: Bdale Garbee <bdale@gag.com>, Peter Eisentraut <petere@debian.org>, Kurt Roeckx <kurt@roeckx.be>
+Maintainer: Vyatta <eng@vyatta.com>
 Build-Depends: debhelper (>= 6), libedit-dev, libcap-dev | not+linux-gnu, libssl-dev (>= 0.9), quilt (>= 0.40)
-Build-Conflicts: libavahi-compat-libdnssd-dev, libreadline-dev, libwww-dev, libwww-ssl-dev
+Build-Conflicts: libavahi-compat-libdnssd-dev, libwww-dev, libwww-ssl-dev
 Standards-Version: 3.8.0
 Homepage: http://support.ntp.org/
 Vcs-Browser: http://svn.debian.org/wsvn/pkg-ntp/ntp/trunk/
