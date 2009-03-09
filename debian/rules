@@ -15,8 +15,8 @@ else
 CFLAGS += -O2
 endif
 
-config: patch config.status
-config.status: $(QUILT_STAMPFN)
+config: config.status
+config.status: 
 	dh_testdir
 	./configure CFLAGS='$(CFLAGS)' \
 		ac_cv_var_tick=no ac_cv_var_tickadj=no \
@@ -33,7 +33,7 @@ build-stamp: config.status
 	$(MAKE)
 	touch $@
 
-clean: clean-patched unpatch
+clean: clean-patched
 clean-patched:
 	dh_testdir
 	dh_testroot
@@ -116,4 +116,4 @@ binary-arch: build install
 	dh_builddeb -a
 
 binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install patch unpatch clean-patched
+.PHONY: build clean binary-indep binary-arch binary install clean-patched
