@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include "ntp_rfc2553.h"
+#include "ntp_refclock.h"
 
 #include "ntp_types.h"
 #include "ntp_string.h"

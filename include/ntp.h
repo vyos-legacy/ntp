@@ -5,6 +5,7 @@
 #define NTP_H
 
 #include "ntp_types.h"
+#include "ntp_fp.h"
 #include <math.h>
 #ifdef OPENSSL
 #include "ntp_crypto.h"

@@ -9,6 +9,7 @@
 #include "ntp_select.h"
 #include "ntp_malloc.h"
 #include "ntp_refclock.h"
+#include "ntp_control.h"
 #include "recvbuff.h"
 
 

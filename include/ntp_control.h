@@ -1,3 +1,5 @@
+#ifndef NTP_CONTROL
+#define NTP_CONTROL
 /*
  * ntp_control.h - definitions related to NTP mode 6 control messages
  */
@@ -285,3 +287,5 @@ extern struct ctl_trap ctl_trap[];
 #define	TYPE_SYS	1
 #define	TYPE_PEER	2
 #define	TYPE_CLOCK	3
+
+#endif /* NTP_CONTROL */
