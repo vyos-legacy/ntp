@@ -12,7 +12,7 @@ CFLAGS = -g -fno-strict-aliasing
 ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
 CFLAGS += -O0
 else
-CFLAGS += -O2
+CFLAGS += -Os
 endif
 
 config: config.status
@@ -22,7 +22,7 @@ config.status:
 		ac_cv_var_tick=no ac_cv_var_tickadj=no \
 		--prefix=/usr \
 		--enable-all-clocks --enable-parse-clocks --enable-SHM \
-		--disable-debugging --sysconfdir=/var/lib/ntp \
+		--enable-debugging --sysconfdir=/var/lib/ntp \
 		--with-sntp=no \
 		--enable-linuxcaps \
 		--disable-dependency-tracking
