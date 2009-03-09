@@ -2,13 +2,13 @@
 AUTOMAKE_OPTIONS = ../util/ansi2knr
 noinst_LIBRARIES = libntp.a @MAKE_LIBNTPSIM@
 EXTRA_LIBRARIES = libntpsim.a
-libntp_a_SRCS = a_md5encrypt.c adjtime.c atoint.c atolfp.c atouint.c \
+libntp_a_SRCS = a_md5encrypt.c atoint.c atolfp.c atouint.c \
 	audio.c authkeys.c authreadkeys.c authusekey.c buftvtots.c \
 	caljulian.c caltontp.c calyearstart.c clocktime.c \
 	clocktypes.c decodenetnum.c dofptoa.c dolfptoa.c emalloc.c \
 	findconfig.c fptoa.c fptoms.c getopt.c hextoint.c \
 	hextolfp.c humandate.c icom.c inttoa.c iosignal.c \
-	lib_strbuf.c machines.c md5c.c memmove.c mfptoa.c \
+	lib_strbuf.c machines.c memmove.c mfptoa.c \
 	mfptoms.c mktime.c modetoa.c mstolfp.c msutotsf.c msyslog.c netof.c \
 	ntp_rfc2553.c numtoa.c numtohost.c octtoint.c prettydate.c \
 	ntp_random.c recvbuff.c refnumtoa.c snprintf.c socktoa.c socktohost.c \

@@ -6,12 +6,10 @@ EXTRA_DIST = autogen-version.def copyright.def debug-opt.def homerc.def version.
 SUBDIRS = isc
 
 noinst_HEADERS = \
-	adjtime.h \
 	audio.h \
 	ascii.h \
 	audio.h \
 	binio.h \
-	global.h \
 	gps.h \
 	hopf6039.h \
 	icom.h \
@@ -55,9 +53,5 @@ noinst_HEADERS = \
 	parse.h \
 	parse_conf.h \
 	recvbuff.h \
-	rsa_md5.h \
-	timepps-SCO.h	\
-	timepps-Solaris.h	\
-	timepps-SunOS.h	\
 	trimble.h
 

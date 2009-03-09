@@ -59,7 +59,7 @@ libntpd_a_SOURCES = jupiter.h ntp_control.c \
 	refclock_fg.c refclock_gpsvme.c refclock_heath.c refclock_hopfser.c \
 	refclock_hopfpci.c refclock_hpgps.c refclock_irig.c refclock_jjy.c \
 	refclock_jupiter.c refclock_leitch.c refclock_local.c \
-	refclock_mx4200.c refclock_neoclock4x.c \
+	refclock_mx4200.c \
 	refclock_nmea.c refclock_oncore.c refclock_palisade.c \
 	refclock_palisade.h refclock_parse.c \
 	refclock_pcf.c refclock_pst.c refclock_ripencc.c refclock_shm.c \

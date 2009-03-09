@@ -11,7 +11,6 @@ endif
 SUBDIRS+= 		\
 	scripts 	\
 	include 	\
-	ElectricFence	\
 	@ARLIB_DIR@ 	\
 	libntp		\
 	libparse	\
@@ -23,15 +22,12 @@ SUBDIRS+= 		\
 	adjtimed	\
 	clockstuff	\
 	kernel		\
-	sntp		\
 	util		\
 	$(NULL)
 
 DIST_SUBDIRS=		\
 	scripts		\
 	include		\
-	ElectricFence	\
-	arlib		\
 	libntp		\
 	libopts		\
 	libparse	\
@@ -43,7 +39,6 @@ DIST_SUBDIRS=		\
 	adjtimed	\
 	clockstuff	\
 	kernel		\
-	sntp		\
 	util		\
 	$(NULL)
 

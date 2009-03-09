@@ -2550,15 +2550,15 @@ case "$ntp_ok$host" in
  yes*-*-ultrix*) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
 esac
 
-AC_MSG_CHECKING(for NeoClock4X receiver)
-AC_ARG_ENABLE(NEOCLOCK4X,
-    AC_HELP_STRING([--enable-NEOCLOCK4X], [+ NeoClock4X DCF77 / TDF receiver]),
-    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
-if test "$ntp_ok" = "yes"; then
-    ntp_refclock=yes
-    AC_DEFINE(CLOCK_NEOCLOCK4X, 1, [NeoClock4X])
-fi
-AC_MSG_RESULT($ntp_ok)
+dnl AC_MSG_CHECKING(for NeoClock4X receiver)
+dnl AC_ARG_ENABLE(NEOCLOCK4X,
+dnl     AC_HELP_STRING([--enable-NEOCLOCK4X], [+ NeoClock4X DCF77 / TDF receiver]),
+dnl     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+dnl if test "$ntp_ok" = "yes"; then
+dnl     ntp_refclock=yes
+dnl     AC_DEFINE(CLOCK_NEOCLOCK4X, 1, [NeoClock4X])
+dnl fi
+dnl AC_MSG_RESULT($ntp_ok)
 
 AC_MSG_CHECKING(NMEA GPS receiver)
 AC_ARG_ENABLE(NMEA,
@@ -2954,21 +2954,21 @@ case "$ntp_ok$ntp_canparse" in
     ;;
 esac
 
-AC_MSG_CHECKING(WHARTON 400A Series clock)
-AC_ARG_ENABLE(WHARTON,
-    AC_HELP_STRING([--enable-WHARTON], [s WHARTON 400A Series clock]),
-    [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
-if test "$ntp_ok" = "yes"; then
-    ntp_libparse=yes
-    ntp_refclock=yes
-    AC_DEFINE(CLOCK_WHARTON_400A, 1, [WHARTON 400A Series protocol])
-fi
-AC_MSG_RESULT($ntp_ok)
-case "$ntp_ok$ntp_canparse" in
- yesno)
-    AC_MSG_ERROR(That's a parse clock and this system doesn't support it!)
-    ;;
-esac
+dnl AC_MSG_CHECKING(WHARTON 400A Series clock)
+dnl AC_ARG_ENABLE(WHARTON,
+dnl     AC_HELP_STRING([--enable-WHARTON], [s WHARTON 400A Series clock]),
+dnl     [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
+dnl if test "$ntp_ok" = "yes"; then
+dnl     ntp_libparse=yes
+dnl     ntp_refclock=yes
+dnl     AC_DEFINE(CLOCK_WHARTON_400A, 1, [WHARTON 400A Series protocol])
+dnl fi
+dnl AC_MSG_RESULT($ntp_ok)
+dnl case "$ntp_ok$ntp_canparse" in
+dnl  yesno)
+dnl     AC_MSG_ERROR(That's a parse clock and this system doesn't support it!)
+dnl     ;;
+dnl esac
 
 AC_MSG_CHECKING(VARITEXT clock)
 AC_ARG_ENABLE(VARITEXT,
@@ -4172,7 +4172,6 @@ found_rt_iflist
 AC_DEFINE_DIR(NTP_KEYSDIR, sysconfdir, [Default location of crypto key info])
 
 AC_CONFIG_FILES(Makefile)
-AC_CONFIG_FILES(ElectricFence/Makefile)
 AC_CONFIG_FILES(adjtimed/Makefile)
 AC_CONFIG_FILES(clockstuff/Makefile)
 AC_CONFIG_FILES(include/Makefile)
@@ -4196,7 +4195,6 @@ AC_CONFIG_FILES(scripts/mkver,		[chmod +x scripts/mkver])
 AC_CONFIG_FILES(scripts/ntp-wait,	[chmod +x scripts/ntp-wait])
 AC_CONFIG_FILES(scripts/ntpsweep,	[chmod +x scripts/ntpsweep])
 AC_CONFIG_FILES(scripts/ntptrace,	[chmod +x scripts/ntptrace])
-AC_CONFIG_FILES(scripts/ntpver,		[chmod +x scripts/ntpver])
 AC_CONFIG_FILES(scripts/plot_summary,	[chmod +x scripts/plot_summary])
 AC_CONFIG_FILES(scripts/summary,	[chmod +x scripts/summary])
 AC_CONFIG_FILES(util/Makefile)

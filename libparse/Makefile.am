@@ -19,7 +19,6 @@ libparse_a_SOURCES = parse.c \
                      clk_rcc8000.c \
                      clk_hopf6021.c \
 	             clk_computime.c \
-		     clk_wharton.c \
 		     clk_varitext.c \
                      data_mbg.c \
 		     info_trimble.c \
@@ -42,7 +41,6 @@ libparse_kernel_a_LIBADD = kparse$U.o \
 			    kclk_trimtaip$U.o \
 			    kclk_trimtsip$U.o \
 			    kclk_varitext$U.o \
-			    kclk_wharton$U.o \
 			    kbinio$U.o \
 			    kieee754io$U.o \
 			    kmfp_mul$U.o \
