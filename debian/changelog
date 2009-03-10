@@ -1,4 +1,4 @@
-ntp (1:4.2.4p6+vyatta-2) unstable; urgency=low
+ntp (4.2.4p6+vyatta-2) unstable; urgency=low
 
   * Enable debugging
   * Ignore tentative IPV6 interfaces
