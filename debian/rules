@@ -75,6 +75,7 @@ install: build-stamp
 	dh_movefiles --sourcedir=debian/ntp
 
 binary-indep: build install
+	rm -f debian/files
 	dh_testdir -i
 	dh_testroot -i
 	dh_installdocs -i html
@@ -89,7 +90,11 @@ binary-indep: build install
 	dh_compress -i
 	dh_fixperms -i
 	dh_installdeb -i
-	dh_gencontrol -i
+	if [ -f "../.VYATTA_DEV_BUILD" ]; then \
+		dh_gencontrol -i -- -v999.dev; \
+	else \
+		dh_gencontrol -i; \
+	fi
 	dh_md5sums -i
 	dh_builddeb -i
 
@@ -111,7 +116,11 @@ binary-arch: build install
 	dh_fixperms -a
 	dh_installdeb -a
 	dh_shlibdeps -a
-	dh_gencontrol -a
+	if [ -f "../.VYATTA_DEV_BUILD" ]; then \
+		dh_gencontrol -a -- -v999.dev; \
+	else \
+		dh_gencontrol -a; \
+	fi
 	dh_md5sums -a
 	dh_builddeb -a
 
