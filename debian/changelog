@@ -1,3 +1,9 @@
+ntp (4.2.4p6+vyatta-4) unstable; urgency=low
+
+  * UNRELEASED
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Fri, 29 May 2009 18:34:22 -0700
+
 ntp (4.2.4p6+vyatta-3) unstable; urgency=low
 
   * remove derived file and change version string
