@@ -570,7 +570,7 @@ crypto_recv(
 			peer->issuer = emalloc(vallen + 1);
 			strcpy(peer->issuer, peer->subject);
 			temp32 = (fstamp >> 16) & 0xffff;
-			sprintf(statstr,
+			snprintf(statstr, sizeof(statstr),
 			    "flags 0x%x host %s signature %s", fstamp,
 			    peer->subject, OBJ_nid2ln(temp32));
 			record_crypto_stats(&peer->srcadr, statstr);
