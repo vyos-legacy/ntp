@@ -1,3 +1,11 @@
+ntp (4.2.4p6+vyatta-3+jenner2) unstable; urgency=low
+
+  * Fix Debian CVE-2009-0159
+  * Fix Debian CVE-2009-1252
+  * Fix Debian CVE-2009-3563
+
+ -- Stephen Hemminger <stephen.hemminger@vyatta.com>  Fri, 11 Dec 2009 17:06:21 -0800
+
 ntp (4.2.4p6+vyatta-3+jenner1) unstable; urgency=low
 
   * UNRELEASED
