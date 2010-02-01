@@ -9,6 +9,9 @@ export AUTOMAKE   = : automake
 export AUTOHEADER = : autoheader
 
 CFLAGS = -g -fno-strict-aliasing
+
+CFLAGS += -fstack-protector -fPIE
+LDFLAGS += -pie
 ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
 CFLAGS += -O0
 else
