@@ -1,3 +1,9 @@
+ntp (4.2.4p6+vyatta-8+larkspur1) unstable; urgency=low
+
+  * UNRELEASED
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Thu, 22 Jul 2010 17:15:48 -0700
+
 ntp (4.2.4p6+vyatta-8) unstable; urgency=low
 
   * UNRELEASED
