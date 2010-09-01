@@ -1,7 +1,5 @@
 #!/usr/bin/make -f
 
-#include /usr/share/quilt/quilt.make
-
 # hacks to avoid running these things during the build
 export ACLOCAL    = : aclocal
 export AUTOCONF   = : autoconf
@@ -36,8 +34,7 @@ build-stamp: config.status
 	$(MAKE)
 	touch $@
 
-clean: clean-patched
-clean-patched:
+clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp 
@@ -82,7 +79,6 @@ binary-indep: build install
 	dh_testdir -i
 	dh_testroot -i
 	dh_installdocs -i html
-	rm -f debian/ntp-doc/usr/share/doc/ntp-doc/html/hints/solaris*
 	dh_installexamples -i
 	dh_installman -i
 	dh_installcron -i
@@ -127,5 +123,5 @@ binary-arch: build install
 	dh_md5sums -a
 	dh_builddeb -a
 
-binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install clean-patched
+binary: binary-arch
+.PHONY: build clean binary-indep binary-arch binary install

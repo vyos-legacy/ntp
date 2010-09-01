@@ -2,7 +2,8 @@ Source: ntp
 Section: net
 Priority: optional
 Maintainer: Vyatta Package Maintainers <maintainers@vyatta.com>
-Build-Depends: debhelper (>= 6), libedit-dev, libcap-dev | not+linux-gnu, libssl-dev (>= 0.9), quilt (>= 0.40)
+Build-Depends: debhelper (>= 6),
+ libedit-dev, libcap-dev, libssl-dev (>= 0.9)
 Build-Conflicts: libavahi-compat-libdnssd-dev, libwww-dev, libwww-ssl-dev
 Standards-Version: 3.8.0
 Homepage: http://support.ntp.org/
@@ -13,7 +14,6 @@ Package: ntp
 Architecture: any
 Depends: adduser, lsb-base (>= 3.0-3), netbase, ${misc:Depends}, ${shlibs:Depends}
 Recommends: ${perl:Depends}
-Suggests: ntp-doc
 Replaces: logcheck-database
 Description: Network Time Protocol daemon and utility programs
  NTP, the Network Time Protocol, is used to keep computer clocks
@@ -25,9 +25,6 @@ Description: Network Time Protocol daemon and utility programs
  daemon needs to be running on each host that is to have its clock
  accuracy controlled by NTP.  The same NTP daemon is also used to
  provide NTP service to other hosts.
- .
- For more information about the NTP protocol and NTP server
- configuration and operation, install the package "ntp-doc".
 
 Package: ntpdate
 Architecture: any
@@ -49,16 +46,3 @@ Description: client for setting system time from NTP servers
  If the full NTP daemon from the package "ntp" is installed, then
  ntpdate is not necessary.
 
-Package: ntp-doc
-Architecture: all
-Section: doc
-Description: Network Time Protocol documentation
- NTP, the Network Time Protocol, is used to keep computer clocks
- accurate by synchronizing them over the Internet or a local network,
- or by following an accurate hardware receiver that interprets GPS,
- DCF-77, NIST or similar time signals.
- .
- This package contains HTML documentation for the ntp packages (ntp,
- ntpdate).  Since there are no substantive man pages for ntp's
- programs and configuration files, this package is desirable for any
- setup beyond the simple default configuration.
