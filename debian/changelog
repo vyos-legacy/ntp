@@ -1,3 +1,9 @@
+ntp (4.2.4p6+vyatta-12) unstable; urgency=low
+
+  * rebuild to link with new libcap
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Fri, 03 Sep 2010 15:53:39 -0700
+
 ntp (4.2.4p6+vyatta-11) unstable; urgency=low
 
   * UNRELEASED
