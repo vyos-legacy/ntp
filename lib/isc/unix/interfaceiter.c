@@ -151,6 +151,7 @@ get_addr(unsigned int family, isc_netaddr_t *dst, struct sockaddr *src,
 static isc_result_t linux_if_inet6_next(isc_interfaceiter_t *);
 static isc_result_t linux_if_inet6_current(isc_interfaceiter_t *);
 static void linux_if_inet6_first(isc_interfaceiter_t *iter);
+#include <linux/if_addr.h>
 #endif
 
 #if HAVE_GETIFADDRS
@@ -216,6 +217,11 @@ linux_if_inet6_current(isc_interfaceiter_t *iter) {
 			      "/proc/net/if_inet6:strlen(%s) != 32", address);
 		return (ISC_R_FAILURE);
 	}
+#ifdef __linux
+	/* Ignore DAD addresses -- can't bind to them till resolved */
+	if (flags & IFA_F_TENTATIVE)
+		return (ISC_R_IGNORE);
+#endif
 	for (i = 0; i < 16; i++) {
 		unsigned char byte;
 		static const char hex[] = "0123456789abcdef";
