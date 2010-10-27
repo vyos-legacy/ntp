@@ -7,13 +7,12 @@ export AUTOMAKE   = : automake
 export AUTOHEADER = : autoheader
 
 CFLAGS = -g -fno-strict-aliasing
-
 CFLAGS += -fstack-protector -fPIE
 LDFLAGS += -pie
 ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
 CFLAGS += -O0
 else
-CFLAGS += -Os
+CFLAGS += -O2
 endif
 
 config: config.status
@@ -23,9 +22,12 @@ config.status:
 		ac_cv_var_tick=no ac_cv_var_tickadj=no \
 		--prefix=/usr \
 		--enable-all-clocks --enable-parse-clocks --enable-SHM \
-		--enable-debugging --sysconfdir=/var/lib/ntp \
+		--disable-debugging --sysconfdir=/var/lib/ntp \
 		--with-sntp=no \
 		--enable-linuxcaps \
+		--with-lineeditlibs=edit \
+		--disable-local-libopts \
+		--enable-ntp-signd \
 		--disable-dependency-tracking
 
 build: config build-stamp
@@ -68,9 +70,7 @@ install: build-stamp
 	install -D -m 0644 debian/ntp.conf debian/ntp/etc/ntp.conf
 
 	# remove upstream man pages, which are currently not as nice as ours
-	rm $(addprefix debian/ntp/usr/share/man/man1/,ntpd.1 ntpdc.1 ntpdsim.1 ntp-keygen.1 ntpq.1)
-
-	rmdir debian/ntp/usr/lib/
+	rm $(addprefix debian/ntp/usr/share/man/man1/,ntpd.1 ntpdc.1 ntp-keygen.1 ntpq.1)
 
 	dh_movefiles --sourcedir=debian/ntp
 
@@ -103,7 +103,7 @@ binary-arch: build install
 	dh_installdocs -a
 	dh_installexamples -a
 	dh_installman -a
-	dh_installinit -pntp --update-rcd-params="defaults 23" --error-handler=installinit_error
+	dh_installinit -pntp --update-rcd-params="start 23 2 3 4 5 ." --error-handler=installinit_error
 	dh_installinit -pntpdate
 	dh_installcron -a
 	dh_installlogcheck -a

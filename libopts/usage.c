@@ -1,7 +1,7 @@
 
 /*
- *  usage.c  $Id: usage.c,v 4.15 2007/04/28 22:19:23 bkorb Exp $
- * Time-stamp:      "2007-04-15 11:02:46 bkorb"
+ *  usage.c  $Id: f611ee45aa9aa8dc102b8acf6b4bc568c60fa99f $
+ * Time-stamp:      "2009-10-02 23:18:50 bkorb"
  *
  *  This module implements the default usage procedure for
  *  Automated Options.  It may be overridden, of course.
@@ -13,46 +13,25 @@
  */
 
 /*
- *  Automated Options copyright 1992-2007 Bruce Korb
+ *  This file is part of AutoOpts, a companion to AutoGen.
+ *  AutoOpts is free software.
+ *  AutoOpts is copyright (c) 1992-2009 by Bruce Korb - all rights reserved
  *
- *  Automated Options is free software.
- *  You may redistribute it and/or modify it under the terms of the
- *  GNU General Public License, as published by the Free Software
- *  Foundation; either version 2, or (at your option) any later version.
+ *  AutoOpts is available under any one of two licenses.  The license
+ *  in use must be one of these two and the choice is under the control
+ *  of the user of the license.
  *
- *  Automated Options is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *   The GNU Lesser General Public License, version 3 or later
+ *      See the files "COPYING.lgplv3" and "COPYING.gplv3"
  *
- *  You should have received a copy of the GNU General Public License
- *  along with Automated Options.  See the file "COPYING".  If not,
- *  write to:  The Free Software Foundation, Inc.,
- *             51 Franklin Street, Fifth Floor,
- *             Boston, MA  02110-1301, USA.
+ *   The Modified Berkeley Software Distribution License
+ *      See the file "COPYING.mbsd"
  *
- * As a special exception, Bruce Korb gives permission for additional
- * uses of the text contained in his release of AutoOpts.
+ *  These files have the following md5sums:
  *
- * The exception is that, if you link the AutoOpts library with other
- * files to produce an executable, this does not by itself cause the
- * resulting executable to be covered by the GNU General Public License.
- * Your use of that executable is in no way restricted on account of
- * linking the AutoOpts library code into it.
- *
- * This exception does not however invalidate any other reasons why
- * the executable file might be covered by the GNU General Public License.
- *
- * This exception applies only to the code released by Bruce Korb under
- * the name AutoOpts.  If you copy code from other sources under the
- * General Public License into a copy of AutoOpts, as the General Public
- * License permits, the exception does not apply to the code that you add
- * in this way.  To avoid misleading anyone as to the status of such
- * modified files, you must delete this exception notice from them.
- *
- * If you write modifications of your own for AutoOpts, it is your choice
- * whether to permit this exception to apply to your modifications.
- * If you do not wish that, delete this exception notice.
+ *  43b91e8ca915626ed3818ffb1b71248b pkg/libopts/COPYING.gplv3
+ *  06a1a2e4760c90ea5e1dad8dfaac4d39 pkg/libopts/COPYING.lgplv3
+ *  66a5cedaf62c4b2637025f049f9b826f pkg/libopts/COPYING.mbsd
  */
 
 #define OPTPROC_L_N_S  (OPTPROC_LONGOPT | OPTPROC_SHORTOPT)
@@ -64,7 +43,7 @@ static char    zOptFmtLine[ 16 ];
 static ag_bool displayEnum;
 
 /* = = = START-STATIC-FORWARD = = = */
-/* static forward declarations maintained by :mkfwd */
+/* static forward declarations maintained by mk-fwd */
 static ag_bool
 checkGNUUsage( tOptions* pOpts );
 
@@ -82,6 +61,12 @@ printInitList(
     tCC*        pzPN );
 
 static void
+printOptPreamble(
+    tOptions*     pOptions,
+    tOptDesc*     pOD,
+    arg_types_t*  pAT );
+
+static void
 printOneUsage(
     tOptions*     pOptions,
     tOptDesc*     pOD,
@@ -89,9 +74,9 @@ printOneUsage(
 
 static void
 printOptionUsage(
-    tOptions* pOpts,
-    int       ex_code,
-    tCC*      pOptTitle );
+    tOptions *  pOpts,
+    int         ex_code,
+    tCC *       pOptTitle );
 
 static void
 printProgramDetails( tOptions* pOptions );
@@ -187,9 +172,32 @@ optionUsage(
      *  Paged usage will preset option_usage_fp to an output file.
      *  If it hasn't already been set, then set it to standard output
      *  on successful exit (help was requested), otherwise error out.
+     *
+     *  Test the version before obtaining pzFullUsage or pzShortUsage.
+     *  These fields do not exist before revision 30.
      */
-    if (option_usage_fp == NULL)
-        option_usage_fp = (actual_exit_code != EXIT_SUCCESS) ? stderr : stdout;
+    {
+        char const * pz;
+
+        if (actual_exit_code == EXIT_SUCCESS) {
+            pz = (pOptions->structVersion >= 30 * 4096)
+                ? pOptions->pzFullUsage : NULL;
+
+            if (option_usage_fp == NULL)
+                option_usage_fp = stdout;
+        } else {
+            pz = (pOptions->structVersion >= 30 * 4096)
+                ? pOptions->pzShortUsage : NULL;
+
+            if (option_usage_fp == NULL)
+                option_usage_fp = stderr;
+        }
+
+        if (pz != NULL) {
+            fputs(pz, option_usage_fp);
+            exit(actual_exit_code);
+        }
+    }
 
     fprintf( option_usage_fp, pOptions->pzUsageTitle, pOptions->pzProgName );
 
@@ -319,13 +327,23 @@ printExtendedUsage(
         fprintf( option_usage_fp, zDis, pOD->pz_DisableName );
 
     /*
-     *  IF the numeric option has a special callback,
-     *  THEN call it, requesting the range or other special info
+     *  Check for argument types that have callbacks with magical properties
      */
-    if (  (OPTST_GET_ARGTYPE(pOD->fOptState) == OPARG_TYPE_NUMERIC)
-       && (pOD->pOptProc != NULL)
-       && (pOD->pOptProc != optionNumericVal) ) {
-        (*(pOD->pOptProc))( pOptions, NULL );
+    switch (OPTST_GET_ARGTYPE(pOD->fOptState)) {
+    case OPARG_TYPE_NUMERIC:
+        /*
+         *  IF the numeric option has a special callback,
+         *  THEN call it, requesting the range or other special info
+         */
+        if (  (pOD->pOptProc != NULL)
+           && (pOD->pOptProc != optionNumericVal) ) {
+            (*(pOD->pOptProc))(OPTPROC_EMIT_USAGE, pOD);
+        }
+        break;
+
+    case OPARG_TYPE_FILE:
+        (*(pOD->pOptProc))(OPTPROC_EMIT_USAGE, pOD);
+        break;
     }
 
     /*
@@ -450,11 +468,8 @@ printInitList(
 }
 
 
-/*
- *  Print the usage information for a single option.
- */
 static void
-printOneUsage(
+printOptPreamble(
     tOptions*     pOptions,
     tOptDesc*     pOD,
     arg_types_t*  pAT )
@@ -467,17 +482,31 @@ printOneUsage(
      */
     if ((pOptions->fOptSet & OPTPROC_SHORTOPT) == 0)
         fputs( pAT->pzSpc, option_usage_fp );
-    else if (! isgraph( pOD->optValue)) {
+
+    else if (! IS_GRAPHIC_CHAR(pOD->optValue)) {
         if (  (pOptions->fOptSet & (OPTPROC_GNUUSAGE|OPTPROC_LONGOPT))
            == (OPTPROC_GNUUSAGE|OPTPROC_LONGOPT))
             fputc( ' ', option_usage_fp );
         fputs( pAT->pzNoF, option_usage_fp );
+
     } else {
         fprintf( option_usage_fp, "   -%c", pOD->optValue );
         if (  (pOptions->fOptSet & (OPTPROC_GNUUSAGE|OPTPROC_LONGOPT))
            == (OPTPROC_GNUUSAGE|OPTPROC_LONGOPT))
             fputs( ", ", option_usage_fp );
     }
+}
+
+/*
+ *  Print the usage information for a single option.
+ */
+static void
+printOneUsage(
+    tOptions*     pOptions,
+    tOptDesc*     pOD,
+    arg_types_t*  pAT )
+{
+    printOptPreamble(pOptions, pOD, pAT);
 
     {
         char  z[ 80 ];
@@ -487,20 +516,20 @@ printOneUsage(
          *  when the option argument is required, base the type string on the
          *  argument type.
          */
-        if (OPTST_GET_ARGTYPE(pOD->fOptState) == OPARG_TYPE_NONE) {
-            pzArgType = pAT->pzNo;
-
-        } else if (pOD->fOptState & OPTST_ARG_OPTIONAL) {
+        if (pOD->fOptState & OPTST_ARG_OPTIONAL) {
             pzArgType = pAT->pzOpt;
 
         } else switch (OPTST_GET_ARGTYPE(pOD->fOptState)) {
+        case OPARG_TYPE_NONE:        pzArgType = pAT->pzNo;   break;
         case OPARG_TYPE_ENUMERATION: pzArgType = pAT->pzKey;  break;
+        case OPARG_TYPE_FILE       : pzArgType = pAT->pzFile; break;
         case OPARG_TYPE_MEMBERSHIP:  pzArgType = pAT->pzKeyL; break;
         case OPARG_TYPE_BOOLEAN:     pzArgType = pAT->pzBool; break;
         case OPARG_TYPE_NUMERIC:     pzArgType = pAT->pzNum;  break;
         case OPARG_TYPE_HIERARCHY:   pzArgType = pAT->pzNest; break;
         case OPARG_TYPE_STRING:      pzArgType = pAT->pzStr;  break;
-        default:                     goto bogus_desc;         break;
+        case OPARG_TYPE_TIME:        pzArgType = pAT->pzTime; break;
+        default:                     goto bogus_desc;
         }
 
         snprintf( z, sizeof(z), pAT->pzOptFmt, pzArgType, pOD->pz_Name,
@@ -527,18 +556,36 @@ printOneUsage(
  */
 static void
 printOptionUsage(
-    tOptions* pOpts,
-    int       ex_code,
-    tCC*      pOptTitle )
+    tOptions *  pOpts,
+    int         ex_code,
+    tCC *       pOptTitle )
 {
-    int        ct     = pOpts->optCt;
-    int        optNo  = 0;
-    tOptDesc*  pOD    = pOpts->pOptDesc;
-    int        docCt  = 0;
+    int         ct     = pOpts->optCt;
+    int         optNo  = 0;
+    tOptDesc *  pOD    = pOpts->pOptDesc;
+    int         docCt  = 0;
 
     do  {
-        if ((pOD->fOptState & OPTST_OMITTED) != 0)
+        if ((pOD->fOptState & OPTST_NO_USAGE_MASK) != 0) {
+
+            /*
+             * IF      this is a compiled-out option
+             *   *AND* usage was requested with "omitted-usage"
+             *   *AND* this is NOT abbreviated usage
+             * THEN display this option.
+             */
+            if (  (pOD->fOptState == (OPTST_OMITTED | OPTST_NO_INIT))
+               && (pOD->pz_Name != NULL)
+               && (ex_code == EXIT_SUCCESS))  {
+
+                char const * why_pz =
+                    (pOD->pzText == NULL) ? zDisabledWhy : pOD->pzText;
+                printOptPreamble(pOpts, pOD, &argTypes);
+                fprintf(option_usage_fp, zDisabledOpt, pOD->pz_Name, why_pz);
+            }
+
             continue;
+        }
 
         if ((pOD->fOptState & OPTST_DOCUMENT) != 0) {
             if (ex_code == EXIT_SUCCESS) {
@@ -558,12 +605,12 @@ printOptionUsage(
          *  THEN document that the remaining options are not user opts
          */
         if (  (pOpts->presetOptCt == optNo)
-              && (ex_code == EXIT_SUCCESS)
-              && (docCt > 0)
-              && ((pOD[-1].fOptState & OPTST_DOCUMENT) == 0) )
+           && (ex_code == EXIT_SUCCESS)
+           && (docCt > 0)
+           && ((pOD[-1].fOptState & OPTST_DOCUMENT) == 0) )
             fprintf( option_usage_fp, argTypes.pzBrk, zAuto, pOptTitle );
 
-        printOneUsage( pOpts, pOD, &argTypes );
+        printOneUsage(pOpts, pOD, &argTypes);
 
         /*
          *  IF we were invoked because of the --help option,
@@ -619,7 +666,7 @@ printProgramDetails( tOptions* pOptions )
             switch (OPTST_GET_ARGTYPE(pOD->fOptState)) {
             case OPARG_TYPE_ENUMERATION:
             case OPARG_TYPE_MEMBERSHIP:
-                (*(pOD->pOptProc))( NULL, pOD );
+                (*(pOD->pOptProc))(OPTPROC_EMIT_USAGE, pOD);
             }
         }  while (pOD++, optNo++, (--ct > 0));
     }
@@ -657,6 +704,8 @@ setGnuOptFmts( tOptions* pOpts, tCC** ppT )
     argTypes.pzNum  = zGnuNumArg;
     argTypes.pzKey  = zGnuKeyArg;
     argTypes.pzKeyL = zGnuKeyLArg;
+    argTypes.pzTime = zGnuTimeArg;
+    argTypes.pzFile = zGnuFileArg;
     argTypes.pzBool = zGnuBoolArg;
     argTypes.pzNest = zGnuNestArg;
     argTypes.pzOpt  = zGnuOptArg;
@@ -694,6 +743,8 @@ setStdOptFmts( tOptions* pOpts, tCC** ppT )
     argTypes.pzNum  = zStdNumArg;
     argTypes.pzKey  = zStdKeyArg;
     argTypes.pzKeyL = zStdKeyLArg;
+    argTypes.pzTime = zStdTimeArg;
+    argTypes.pzFile = zStdFileArg;
     argTypes.pzBool = zStdBoolArg;
     argTypes.pzNest = zStdNestArg;
     argTypes.pzOpt  = zStdOptArg;

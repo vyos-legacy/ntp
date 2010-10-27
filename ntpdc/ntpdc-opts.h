@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.h)
  *  
- *  It has been AutoGen-ed  Thursday January  8, 2009 at 06:18:22 AM EST
+ *  It has been AutoGen-ed  July  9, 2010 at 02:24:08 AM by AutoGen 5.10
  *  From the definitions    ntpdc-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 29:0:4 templates.
+ * Generated from AutoOpts 33:0:8 templates.
  */
 
 /*
@@ -19,7 +19,7 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * ntpdc copyright 1970-2008 David L. Mills and/or others - all rights reserved
+ * ntpdc copyright (c) 1970-2010 David L. Mills and/or others - all rights reserved
  *
  * see html/copyright.html
  */
@@ -30,7 +30,7 @@
  *  "AutoOpts" chapter.  Please refer to that doc for usage help.
  */
 #ifndef AUTOOPTS_NTPDC_OPTS_H_GUARD
-#define AUTOOPTS_NTPDC_OPTS_H_GUARD
+#define AUTOOPTS_NTPDC_OPTS_H_GUARD 1
 #include "config.h"
 #include <autoopts/options.h>
 
@@ -41,7 +41,7 @@
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 118784
+#define AO_TEMPLATE_VERSION 135168
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -52,26 +52,26 @@
  *  Enumeration of each option:
  */
 typedef enum {
-        INDEX_OPT_IPV4             =  0,
-        INDEX_OPT_IPV6             =  1,
-        INDEX_OPT_COMMAND          =  2,
-        INDEX_OPT_LISTPEERS        =  3,
-        INDEX_OPT_PEERS            =  4,
-        INDEX_OPT_SHOWPEERS        =  5,
-        INDEX_OPT_INTERACTIVE      =  6,
-        INDEX_OPT_DEBUG_LEVEL      =  7,
-        INDEX_OPT_SET_DEBUG_LEVEL  =  8,
-        INDEX_OPT_NUMERIC          =  9,
-        INDEX_OPT_VERSION          = 10,
-        INDEX_OPT_HELP             = 11,
-        INDEX_OPT_MORE_HELP        = 12,
-        INDEX_OPT_SAVE_OPTS        = 13,
-        INDEX_OPT_LOAD_OPTS        = 14
+    INDEX_OPT_IPV4             =  0,
+    INDEX_OPT_IPV6             =  1,
+    INDEX_OPT_COMMAND          =  2,
+    INDEX_OPT_LISTPEERS        =  3,
+    INDEX_OPT_PEERS            =  4,
+    INDEX_OPT_SHOWPEERS        =  5,
+    INDEX_OPT_INTERACTIVE      =  6,
+    INDEX_OPT_DEBUG_LEVEL      =  7,
+    INDEX_OPT_SET_DEBUG_LEVEL  =  8,
+    INDEX_OPT_NUMERIC          =  9,
+    INDEX_OPT_VERSION          = 10,
+    INDEX_OPT_HELP             = 11,
+    INDEX_OPT_MORE_HELP        = 12,
+    INDEX_OPT_SAVE_OPTS        = 13,
+    INDEX_OPT_LOAD_OPTS        = 14
 } teOptIndex;
 
 #define OPTION_CT    15
-#define NTPDC_VERSION       "4.2.4p6"
-#define NTPDC_FULL_VERSION  "ntpdc - vendor-specific NTP query program - Ver. 4.2.4p6"
+#define NTPDC_VERSION       "4.2.6p2"
+#define NTPDC_FULL_VERSION  "ntpdc - vendor-specific NTP query program - Ver. 4.2.6p2"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -151,29 +151,23 @@ typedef enum {
 # undef NUMERIC
 #endif  /*  NO_OPTION_NAME_WARNINGS */
 
-/*
+/* * * * * *
+ *
  *  Interface defines for specific options.
  */
 #define VALUE_OPT_IPV4           '4'
-#define WHICH_OPT_IPV4           (DESC(IPV4).optActualValue)
-#define WHICH_IDX_IPV4           (DESC(IPV4).optActualIndex)
 #define VALUE_OPT_IPV6           '6'
 #define VALUE_OPT_COMMAND        'c'
 #define VALUE_OPT_LISTPEERS      'l'
 #define VALUE_OPT_PEERS          'p'
 #define VALUE_OPT_SHOWPEERS      's'
 #define VALUE_OPT_INTERACTIVE    'i'
-#ifdef DEBUG
 #define VALUE_OPT_DEBUG_LEVEL    'd'
-#endif /* DEBUG */
-#ifdef DEBUG
 #define VALUE_OPT_SET_DEBUG_LEVEL 'D'
-#endif /* DEBUG */
 #define VALUE_OPT_NUMERIC        'n'
-
-#define VALUE_OPT_VERSION       'v'
 #define VALUE_OPT_HELP          '?'
 #define VALUE_OPT_MORE_HELP     '!'
+#define VALUE_OPT_VERSION       INDEX_OPT_VERSION
 #define VALUE_OPT_SAVE_OPTS     '>'
 #define VALUE_OPT_LOAD_OPTS     '<'
 #define SET_OPT_SAVE_OPTS(a)   STMTS( \
@@ -190,7 +184,7 @@ typedef enum {
                 ntpdcOptions.pzCurOpt  = NULL )
 #define START_OPT       RESTART_OPT(1)
 #define USAGE(c)        (*ntpdcOptions.pUsageProc)( &ntpdcOptions, c )
-/* extracted from /usr/local/gnu/share/autogen/opthead.tpl near line 360 */
+/* extracted from /usr/local/gnu/share/autogen/opthead.tpl near line 409 */
 
 /* * * * * *
  *
@@ -202,18 +196,37 @@ extern "C" {
 
 extern tOptions   ntpdcOptions;
 
-#ifndef _
-#  if ENABLE_NLS
-#    include <stdio.h>
-     static inline char* aoGetsText( char const* pz ) {
-         if (pz == NULL) return NULL;
-         return (char*)gettext( pz );
-     }
-#    define _(s)  aoGetsText(s)
-#  else  /* ENABLE_NLS */
-#    define _(s)  s
-#  endif /* ENABLE_NLS */
-#endif
+#if defined(ENABLE_NLS)
+# ifndef _
+#   include <stdio.h>
+    static inline char* aoGetsText( char const* pz ) {
+        if (pz == NULL) return NULL;
+        return (char*)gettext( pz );
+    }
+#   define _(s)  aoGetsText(s)
+# endif /* _() */
+
+# define OPT_NO_XLAT_CFG_NAMES  STMTS(ntpdcOptions.fOptSet |= \
+                                    OPTPROC_NXLAT_OPT_CFG;)
+# define OPT_NO_XLAT_OPT_NAMES  STMTS(ntpdcOptions.fOptSet |= \
+                                    OPTPROC_NXLAT_OPT|OPTPROC_NXLAT_OPT_CFG;)
+
+# define OPT_XLAT_CFG_NAMES     STMTS(ntpdcOptions.fOptSet &= \
+                                  ~(OPTPROC_NXLAT_OPT|OPTPROC_NXLAT_OPT_CFG);)
+# define OPT_XLAT_OPT_NAMES     STMTS(ntpdcOptions.fOptSet &= \
+                                  ~OPTPROC_NXLAT_OPT;)
+
+#else   /* ENABLE_NLS */
+# define OPT_NO_XLAT_CFG_NAMES
+# define OPT_NO_XLAT_OPT_NAMES
+
+# define OPT_XLAT_CFG_NAMES
+# define OPT_XLAT_OPT_NAMES
+
+# ifndef _
+#   define _(_s)  _s
+# endif
+#endif  /* ENABLE_NLS */
 
 #ifdef  __cplusplus
 }

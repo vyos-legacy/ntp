@@ -28,8 +28,9 @@ DHCP
 If DHCP is used to configure the host, and the DHCP server sends
 information about NTP servers, then this information will be used
 automatically.  This is done by making a copy of /etc/ntp.conf at
-/etc/ntp.conf.dhcp, replacing the server entries with the information
-provided by the DHCP server, and restarting the NTP server.
+/var/lib/ntp/ntp.conf.dhcp, replacing the server entries with the
+information provided by the DHCP server, and restarting the NTP
+server.
 
 In order for this to work, the "ntp-servers" option must be mentioned
 in the "request" statement in /etc/dhcp3/dhclient.conf.  This is not

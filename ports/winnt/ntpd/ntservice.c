@@ -17,7 +17,10 @@
 
 /* $Id: ntservice.c,v 1.3.2.1.10.3 2004/03/08 04:04:22 marka Exp $ */
 
-#include <config.h>
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #include <stdio.h>
 
 #include <ntp_cmdargs.h>
@@ -27,28 +30,34 @@
 #include "clockstuff.h"
 #include "ntp_iocompletionport.h"
 #include "isc/win32os.h"
-#ifdef DEBUG
-#include <crtdbg.h>
-#endif
+#include <ssl_applink.c>
 
-/* Handle to SCM for updating service status */
+
+/*
+ * Globals
+ */
 static SERVICE_STATUS_HANDLE hServiceStatus = 0;
 static BOOL foreground = FALSE;
-static char ConsoleTitle[128];
+static BOOL computer_shutting_down = FALSE;
 static int glb_argc;
 static char **glb_argv;
 HANDLE hServDoneEvent = NULL;
 int accept_wildcard_if_for_winnt;
 extern volatile int debug;
-extern char *progname;
 
-void uninit_io_completion_port();
-int ntpdmain(int argc, char *argv[]);
 /*
  * Forward declarations
  */
-void ServiceControl(DWORD dwCtrlCode);
+void uninit_io_completion_port();
+int ntpdmain(int argc, char *argv[]);
+void WINAPI ServiceControl(DWORD dwCtrlCode);
 void ntservice_exit(void);
+
+#ifdef WRAP_DBG_MALLOC
+void *wrap_dbg_malloc(size_t s, const char *f, int l);
+void *wrap_dbg_realloc(void *p, size_t s, const char *f, int l);
+void wrap_dbg_free(void *p);
+#endif
 
 void WINAPI service_main( DWORD argc, LPTSTR *argv )
 {
@@ -76,6 +85,9 @@ int main( int argc, char *argv[] )
 	int rc;
 	int i = 1;
 
+
+	ssl_applink();
+
 	/* Save the command line parameters */
 	glb_argc = argc;
 	glb_argv = argv;
@@ -85,41 +97,53 @@ int main( int argc, char *argv[] )
 	if ( isc_win32os_majorversion() <= 4 )
 		accept_wildcard_if_for_winnt = 1;
 
-	/* Command line users should put -n in the options */
+	/*
+	 * This is a hack in the Windows port of ntpd.  Before the
+	 * portable ntpd libopts processing of the command line, we
+	 * need to know if we're "daemonizing" (attempting to start as
+	 * a service).  There is undoubtedly a better way.  Legitimate
+	 * option combinations are broken by this code , such as:
+	 *   ntpd -nc debug.conf
+	 */
 	while (argv[i]) {
-		if (!_strnicmp(argv[i], "-d", 2) ||
-			!strcmp(argv[i], "-q") ||
-			!strcmp(argv[i], "--help") ||
-			!strcmp(argv[i], "-n")) {
+		if (!_strnicmp(argv[i], "-d", 2)
+		    || !strcmp(argv[i], "--debug_level")
+		    || !strcmp(argv[i], "--set-debug_level")
+		    || !strcmp(argv[i], "-q")
+		    || !strcmp(argv[i], "--quit")
+		    || !strcmp(argv[i], "-?")
+		    || !strcmp(argv[i], "--help")
+		    || !_strnicmp(argv[i], "-n", 2)
+		    || !strcmp(argv[i], "--nofork")
+		    || !strcmp(argv[i], "--saveconfigquit")) {
 			foreground = TRUE;
 			break;
 		}
 		i++;
 	}
 
-	if (foreground) {
-		/* run in console window */
-		exit(ntpdmain(argc, argv));
-	} else {
+	if (foreground)			/* run in console window */
+		rc = ntpdmain(argc, argv);
+	else {
 		/* Start up as service */
 
 		SERVICE_TABLE_ENTRY dispatchTable[] = {
-			{ TEXT(NTP_DISPLAY_NAME), (LPSERVICE_MAIN_FUNCTION) service_main },
+			{ TEXT(NTP_DISPLAY_NAME), service_main },
 			{ NULL, NULL }
 		};
 
 		rc = StartServiceCtrlDispatcher(dispatchTable);
-		if (!rc) {
-			progname = argv[0];
+		if (rc)
+			rc = 0; 
+		else {
 			rc = GetLastError();
 #ifdef DEBUG
-			fprintf(stderr, "%s: unable to start as service, rc: %i\n\n", progname, rc);
+			fprintf(stderr, "%s: unable to start as service, rc: %i\n\n", argv[0], rc);
 #endif
 			fprintf(stderr, "\nUse -d, -q, --help or -n to run from the command line.\n");
-			exit(rc);
 		}
 	}
-	exit(0);
+	return rc;
 }
 
 /*
@@ -127,14 +151,15 @@ int main( int argc, char *argv[] )
  */
 void
 ntservice_init() {
+	char ConsoleTitle[256];
+
 	if (!foreground) {
 		/* Register handler with the SCM */
 		hServiceStatus = RegisterServiceCtrlHandler(NTP_DISPLAY_NAME,
-					(LPHANDLER_FUNCTION)ServiceControl);
+					ServiceControl);
 		if (!hServiceStatus) {
 			NTReportError(NTP_SERVICE_NAME,
 				"could not register service control handler");
-			UpdateSCM(SERVICE_STOPPED);
 			exit(1);
 		}
 		UpdateSCM(SERVICE_RUNNING);
@@ -144,8 +169,31 @@ ntservice_init() {
 		SetConsoleTitle(ConsoleTitle);
 	}
 
+#ifdef _CRTDBG_MAP_ALLOC
+		/* ask the runtime to dump memory leaks at exit */
+		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF
+			       | _CRTDBG_LEAK_CHECK_DF		/* report on leaks at exit */
+			       | _CRTDBG_CHECK_ALWAYS_DF	/* Check heap every alloc/dealloc */
+#ifdef MALLOC_LINT
+			       | _CRTDBG_DELAY_FREE_MEM_DF	/* Don't actually free memory */
+#endif
+			       );
+#ifdef DOES_NOT_WORK
+			/*
+			 * hart: I haven't seen this work, running ntpd.exe -n from a shell
+			 * to both a file and the debugger output window.  Docs indicate it
+			 * should cause leak report to go to stderr, but it's only seen if
+			 * ntpd runs under a debugger (in the debugger's output), even with
+			 * this block of code enabled.
+			 */
+			_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
+			_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
+#endif
+#endif /* using MS debug C runtime heap, _CRTDBG_MAP_ALLOC */
+
 	atexit( ntservice_exit );
 }
+
 /*
  * Routine to check if this is a service or a foreground program
  */
@@ -153,39 +201,40 @@ BOOL
 ntservice_isservice() {
 	return(!foreground);
 }
-/* service_ctrl - control handler for NTP service
- * signals the service_main routine of start/stop requests
- * from the control panel or other applications making
- * win32API calls
+
+/*
+ * Routine to check if the service is stopping
+ * because the computer is shutting down
  */
+BOOL
+ntservice_systemisshuttingdown() {
+	return computer_shutting_down;
+}
+
 void
 ntservice_exit( void )
 {
+	uninit_io_completion_port();
+	Sleep( 200 );  	//##++ 
 
-	if (!foreground) { /* did not become a service, simply exit */
+	reset_winnt_time();
+
+	msyslog(LOG_INFO, "ntservice: The Network Time Protocol Service is stopping.");
+
+	if (!foreground) {
 		/* service mode, need to have the service_main routine
 		 * register with the service control manager that the 
 		 * service has stopped running, before exiting
 		 */
 		UpdateSCM(SERVICE_STOPPED);
 	}
-	uninit_io_completion_port();
-	Sleep( 200 );  	//##++ 
-
-	reset_winnt_time();
-
-	msyslog(LOG_INFO, "ntservice: The Network Time Protocol Service has stopped.");
-
-# ifdef DEBUG
-	_CrtDumpMemoryLeaks();
-# endif 
 }
 
 /* 
  * ServiceControl(): Handles requests from the SCM and passes them on
  * to the service.
  */
-void
+void WINAPI
 ServiceControl(DWORD dwCtrlCode) {
 	/* Handle the requested control code */
 	HANDLE exitEvent = get_exit_event();
@@ -193,18 +242,21 @@ ServiceControl(DWORD dwCtrlCode) {
 	switch(dwCtrlCode) {
 
 	case SERVICE_CONTROL_SHUTDOWN:
+		computer_shutting_down = TRUE;
+		/* fall through to stop case */
+
 	case SERVICE_CONTROL_STOP:
-		UpdateSCM(SERVICE_STOP_PENDING);
 		if (exitEvent != NULL) {
 			SetEvent(exitEvent);
+			UpdateSCM(SERVICE_STOP_PENDING);
 			Sleep( 100 );  //##++
 		}
 		return;
- 
+
 	case SERVICE_CONTROL_PAUSE:
 	case SERVICE_CONTROL_CONTINUE:
 	case SERVICE_CONTROL_INTERROGATE:
-        default:
+	default:
 		break;
 	}
 	UpdateSCM(SERVICE_RUNNING);
@@ -231,10 +283,7 @@ void UpdateSCM(DWORD state) {
 		ss.dwWin32ExitCode = NO_ERROR;
 		ss.dwWaitHint = dwState == SERVICE_STOP_PENDING ? 5000 : 1000;
 
-		if (!SetServiceStatus(hServiceStatus, &ss)) {
-			ss.dwCurrentState = SERVICE_STOPPED;
-			SetServiceStatus(hServiceStatus, &ss);
-		}
+		SetServiceStatus(hServiceStatus, &ss);
 	}
 }
 
@@ -247,7 +296,7 @@ OnConsoleEvent(
 
 	switch (dwCtrlType) {
 #ifdef DEBUG
-		case CTRL_BREAK_EVENT :
+		case CTRL_BREAK_EVENT:
 			if (debug > 0) {
 				debug <<= 1;
 			}
@@ -257,24 +306,28 @@ OnConsoleEvent(
 			if (debug > 8) {
 				debug = 0;
 			}
-			printf("debug level %d\n", debug);
-		break ;
+			msyslog(LOG_DEBUG, "debug level %d", debug);
+			break;
+#else
+		case CTRL_BREAK_EVENT:
+			break;
 #endif
 
-		case CTRL_C_EVENT  :
-		case CTRL_CLOSE_EVENT :
-		case CTRL_SHUTDOWN_EVENT :
+		case CTRL_C_EVENT:
+		case CTRL_CLOSE_EVENT:
+		case CTRL_SHUTDOWN_EVENT:
 			if (exitEvent != NULL) {
 				SetEvent(exitEvent);
 				Sleep( 100 );  //##++
 			}
-		break;
+			break;
 
 		default :
-			return FALSE;
-
-
+			/* pass to next handler */
+			return FALSE; 
 	}
-	return TRUE;;
+
+	/* we've handled it, no more handlers should be called */
+	return TRUE;
 }
 

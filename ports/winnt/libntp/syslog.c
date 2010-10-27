@@ -25,7 +25,9 @@
 #include <stdlib.h>
 #include <syslog.h>
 
-#include <messages.h>
+#include <isc/strerror.h>
+
+#include "messages.h"
 
 static HANDLE hAppLog = NULL;
 static FILE *log_stream;
@@ -131,7 +133,8 @@ void
 openlog(const char *name, int flags, ...) {
 	/* Get a handle to the Application event log */
 	hAppLog = RegisterEventSource(NULL, progname);
-	strcpy(progname, name);
+	strncpy(progname, name, sizeof(progname));
+	progname[sizeof(progname) - 1] = 0;
 }
 
 /*
@@ -191,4 +194,23 @@ NTReportError(const char *name, const char *str) {
 		    NTP_ERROR, NULL, 1, 0, buf, NULL);
 
 	DeregisterEventSource(hNTAppLog);
+}
+
+
+/*
+ * ntp_strerror() - provide strerror()-compatible wrapper for libisc's
+ *		    isc__strerror(), which knows about Windows as well as
+ *		    C runtime error messages.
+ */
+
+char *
+ntp_strerror(
+	int code
+	)
+{
+	static char msgbuf[128];
+
+	isc__strerror(code, msgbuf, sizeof(msgbuf));
+
+	return msgbuf;
 }

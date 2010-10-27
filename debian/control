@@ -3,18 +3,19 @@ Section: net
 Priority: optional
 Maintainer: Vyatta Package Maintainers <maintainers@vyatta.com>
 Build-Depends: debhelper (>= 6),
- libedit-dev, libcap-dev, libssl-dev (>= 0.9)
+ libedit-dev, libcap2-dev, libssl-dev (>= 0.9), autogen
 Build-Conflicts: libavahi-compat-libdnssd-dev, libwww-dev, libwww-ssl-dev
-Standards-Version: 3.8.0
+Standards-Version: 3.8.1
 Homepage: http://support.ntp.org/
 Vcs-Browser: http://svn.debian.org/wsvn/pkg-ntp/ntp/trunk/
 Vcs-Svn: svn://svn.debian.org/pkg-ntp/ntp/trunk/
 
 Package: ntp
 Architecture: any
-Depends: adduser, lsb-base (>= 3.0-3), netbase, ${misc:Depends}, ${shlibs:Depends}
+Depends: adduser, lsb-base (>= 3.2-13), netbase, ${misc:Depends}, ${shlibs:Depends}
+Pre-Depends: dpkg (>= 1.15.7.2)
 Recommends: ${perl:Depends}
-Replaces: logcheck-database
+Breaks: dhcp3-client (<< 4.1.0-1)
 Description: Network Time Protocol daemon and utility programs
  NTP, the Network Time Protocol, is used to keep computer clocks
  accurate by synchronizing them over the Internet or a local network,
@@ -45,4 +46,3 @@ Description: client for setting system time from NTP servers
  .
  If the full NTP daemon from the package "ntp" is installed, then
  ntpdate is not necessary.
-

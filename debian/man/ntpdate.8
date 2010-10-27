@@ -71,7 +71,7 @@ default is to step the time using settimeofday() if the offset
 is greater than +-128 ms. Note that, if the offset is much
 greater than +-128 ms in this case, that it can take a long
 time (hours) to slew the clock to the correct value. During
-this time. the host should not be used to synchronize clients.
+this time, the host should not be used to synchronize clients.
 .TP
 .B \-b
 Force the time to be stepped using the settimeofday() system
@@ -97,7 +97,7 @@ keyfile. The default is /etc/ntp.keys. This file should be in
 the format described in ntpd.
 .TP
 .BI \-o \ version
-Specify the NTP version for outgoint packets as the integer
+Specify the NTP version for outgoing packets as the integer
 version, which can be 1 or 2. The default is 3. This allows
 ntpdate to be used with older NTP versions.
 .TP
@@ -124,7 +124,7 @@ suitable for polling across a LAN.
 Direct ntpdate to use an unprivileged port for outgoing packets.
 This is most useful when behind a firewall that blocks incoming
 traffic to privileged ports, and you want to synchronise with
-hosts beyond the firewall. Note that the -d option always uses
+hosts beyond the firewall. Note that the \-d option always uses
 unprivileged ports.
 .TP
 .B \-v
@@ -149,4 +149,4 @@ David L. Mills (mills@udel.edu)
 This manpage converted from html to roff by 
 Fabrizio Polacco <fpolacco@debian.org>
 .SH "SEE ALSO"
-\fBntpdate-debian\fR(8)
+\fBntpdate\-debian\fR(8)

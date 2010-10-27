@@ -14,11 +14,6 @@
 # include "config.h"
 #endif
 
-#if defined(SYS_WINNT)
-#undef close
-#define close closesocket
-#endif
-
 #if defined(REFCLOCK) && (defined(CLOCK_HOPF_SERIAL))
 
 #include "ntpd.h"
@@ -49,6 +44,12 @@
 
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
+#endif
+
+#ifdef SYS_WINNT
+extern int async_write(int, const void *, unsigned int);
+#undef write
+#define write(fd, data, octets)	async_write(fd, data, octets)
 #endif
 
 /*
@@ -94,11 +95,11 @@ struct hopfclock_unit {
  * Function prototypes
  */
 
-static	int	hopfserial_start	P((int, struct peer *));
-static	void	hopfserial_shutdown	P((int, struct peer *));
-static	void	hopfserial_receive	P((struct recvbuf *));
-static	void	hopfserial_poll		P((int, struct peer *));
-/* static  void hopfserial_io		P((struct recvbuf *)); */
+static	int	hopfserial_start	(int, struct peer *);
+static	void	hopfserial_shutdown	(int, struct peer *);
+static	void	hopfserial_receive	(struct recvbuf *);
+static	void	hopfserial_poll		(int, struct peer *);
+/* static  void hopfserial_io		(struct recvbuf *); */
 /*
  * Transfer vector
  */
@@ -126,11 +127,8 @@ hopfserial_start (
 	int fd;
 	char gpsdev[20];
 
-#ifdef SYS_WINNT
-	(void) sprintf(gpsdev, "COM%d:", unit);
-#else
-	(void) sprintf(gpsdev, DEVICE, unit);
-#endif
+	snprintf(gpsdev, sizeof(gpsdev), DEVICE, unit);
+
 	/* LDISC_STD, LDISC_RAW
 	 * Open serial port. Use CLK line discipline, if available.
 	 */
@@ -148,18 +146,8 @@ hopfserial_start (
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	up = (struct hopfclock_unit *) emalloc(sizeof(struct hopfclock_unit));
-
-	if (!(up)) {
-                msyslog(LOG_ERR, "hopfSerialClock(%d) emalloc: %m",unit);
-#ifdef DEBUG
-                printf("hopfSerialClock(%d) emalloc\n",unit);
-#endif
-		(void) close(fd);
-		return (0);
-	}
-
-	memset((char *)up, 0, sizeof(struct hopfclock_unit));
+	up = emalloc(sizeof(*up));
+	memset(up, 0, sizeof(*up));
 	pp = peer->procptr;
 	pp->unitptr = (caddr_t)up;
 	pp->io.clock_recv = hopfserial_receive;
@@ -168,10 +156,12 @@ hopfserial_start (
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
 #ifdef DEBUG
-                printf("hopfSerialClock(%d) io_addclock\n",unit);
+		printf("hopfSerialClock(%d) io_addclock\n", unit);
 #endif
-		(void) close(fd);
+		close(fd);
+		pp->io.fd = -1;
 		free(up);
+		pp->unitptr = NULL;
 		return (0);
 	}
 
@@ -204,8 +194,11 @@ hopfserial_shutdown (
 
 	pp = peer->procptr;
 	up = (struct hopfclock_unit *)pp->unitptr;
-	io_closeclock(&pp->io);
-	free(up);
+
+	if (-1 != pp->io.fd)
+		io_closeclock(&pp->io);
+	if (NULL != up)
+		free(up);
 }
 
 
@@ -291,7 +284,7 @@ hopfserial_receive (
 	/* preparation for timecode ntpq rl command ! */
 
 #if 0
-	wsprintf(pp->a_lastcode,
+	snprintf(pp->a_lastcode, sizeof(pp->a_lastcode),
 		 "STATUS: %1X%1X, DATE: %02d.%02d.%04d  TIME: %02d:%02d:%02d",
 		 synch,
 		 DoW,

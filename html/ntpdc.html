@@ -13,10 +13,10 @@
 		<h3><tt>ntpdc</tt> - special NTP query program</h3>
 		<img src="pic/alice31.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
 		<p>This program is a big puppy.</p>
-		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="99">04:11 AM</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="294">Monday, November 27, 2006</csobj></p>
+		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">01:11</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="308">Saturday, November 24, 2007</csobj></p>
 		<br clear="left">
 		<h4>More Help</h4>
-		<script type="text/javascript" language="javascript" src="scripts/links12.txt"></script>
+		<script type="text/javascript" language="javascript" src="scripts/manual.txt"></script>
 		<hr>
 		<h4>Synopsis</h4>
 		<tt>ntpdc [ -ilnps ] [ -c <i>command</i> ] [ <i>host</i> ] [ ... ]</tt>
@@ -163,6 +163,7 @@
 			ntpd.  See the <a href="confopt.html">Server Options</a> page for further information.
 			Each flag (or its absence) replaces the
 			previous setting. The <tt>prefer</tt> keyword indicates a preferred peer (and thus will be used primarily for clock synchronisation if possible). The preferred peer also determines the validity of the PPS signal - if the preferred peer is suitable for synchronisation so is the PPS signal.
+			The <tt>dynamic</tt> keyword allows association configuration even when no suitable network interface is found at configuration time. The dynamic interface update mechanism may complete the configuration when new interfaces appear (e.g. WLAN/PPP interfaces) at a later time and thus render the association operable.
 			<dt><tt>addserver <i>peer_address</i> [
 		<i>keyid</i> ] [ <i>version</i> ] [
 		<tt>minpoll# | prefer | iburst  | burst | minpoll

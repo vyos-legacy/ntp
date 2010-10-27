@@ -67,8 +67,8 @@ static struct audio_info info;	/* audio device info */
 static int ctl_fd;		/* audio control file descriptor */
 
 #ifdef PCM_STYLE_SOUND
-static void audio_config_read P((int, char **, char **));
-static int  mixer_name P((const char *, int));
+static void audio_config_read (int, char **, char **);
+static int  mixer_name (const char *, int);
 
 
 int
@@ -121,15 +121,18 @@ audio_config_read(
 	FILE *fd;
 	char device[20], line[100], ab[100];
 
-	sprintf(device, "%s%d", INIT_FILE, unit);
+	snprintf(device, sizeof(device), "%s%d", INIT_FILE, unit);
 	if ((fd = fopen(device, "r")) == NULL) {
 		printf("audio_config_read: <%s> NO\n", device);
-		sprintf(device, "%s.%d", INIT_FILE, unit);
+		snprintf(device, sizeof(device), "%s.%d", INIT_FILE,
+			 unit);
 		if ((fd = fopen(device, "r")) == NULL) {
 			printf("audio_config_read: <%s> NO\n", device);
-			sprintf(device, "%s.%d", INIT_FILE, unit);
+			snprintf(device, sizeof(device), "%s",
+				 INIT_FILE);
 			if ((fd = fopen(device, "r")) == NULL) {
-				printf("audio_config_read: <%s> NO\n", device);
+				printf("audio_config_read: <%s> NO\n",
+				       device);
 				return;
 			}
 		}
@@ -233,7 +236,7 @@ audio_init(
 		;
 
 #ifdef PCM_STYLE_SOUND
-	(void)sprintf(actl_dev, ACTL_DEV, unit);
+	snprintf(actl_dev, sizeof(actl_dev), ACTL_DEV, unit);
 
 	audio_config_read(unit, &actl, &dname);
 	/* If we have values for cf_c_dev or cf_i_dev, use them. */
@@ -244,18 +247,21 @@ audio_init(
 #endif
 
 	/*
-	 * Open audio device. Do not complain if not there.
+	 * Open audio device
 	 */
 	fd = open(dname, O_RDWR | O_NONBLOCK, 0777);
-	if (fd < 0)
+	if (fd < 0) {
+		msyslog(LOG_ERR, "audio_init: %s %m\n", dname);
 		return (fd);
+	}
 
 	/*
 	 * Open audio control device.
 	 */
 	ctl_fd = open(actl, O_RDWR);
 	if (ctl_fd < 0) {
-		msyslog(LOG_ERR, "audio_init: invalid control device <%s>\n", actl);
+		msyslog(LOG_ERR, "audio_init: invalid control device <%s>\n",
+		    actl);
 		close(fd);
 		return(ctl_fd);
 	}
@@ -377,9 +383,10 @@ audio_gain(
 	if (debug > 1)
 		printf("audio_gain: gain %d/%d\n", gain, l);
 # endif
+#if 0	/* not a good idea to do this; connector wiring dependency */
 	/* figure out what channel(s) to use. just nuke right for now. */
 	r = 0 ; /* setting to zero nicely mutes the channel */
-
+#endif
 	l |= r << 8;
         if ( cf_agc )
           rval = ioctl(ctl_fd, agc, &l);

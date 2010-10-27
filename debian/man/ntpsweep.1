@@ -4,7 +4,7 @@
 ntpsweep \- Sweep NTP Servers and Report Relationships
 .SH SYNOPSIS
 .B ntpsweep
-[ --help|--peers|--strip <string>] <file>|[--host <hostname> ]
+[ \-\-help|\-\-peers|\-\-strip <string>] <file>|[\-\-host <hostname> ]
 
 .SH DESCRIPTION
 .B ntpsweep
@@ -14,20 +14,20 @@ the processor.
 
 .SH OPTIONS
 .TP
-.I --help
+.I \-\-help
 Print this short help text and exit.
 .TP
 .I <file>
 Specify the hosts file. File format is one hostname or ip number per
 line. Lines beginning with # are considered as comment.
 .TP
-.I --host <hostname>
+.I \-\-host <hostname>
 Speficy a single host, bypassing the need for a hosts file.
 .TP
-.I --peers
+.I \-\-peers
 List all peers a host synchronizes to.
 .TP
-.I --strip <string>
+.I \-\-strip <string>
 Strip <string> from hostnames.
 
 .SH AUTHOR

@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpd-opts.texi)
 # 
-# It has been AutoGen-ed  Thursday January  8, 2009 at 06:11:58 AM EST
+# It has been AutoGen-ed  October 26, 2010 at 04:48:40 PM by AutoGen 5.10
 # From the definitions    ntpd-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -27,7 +27,7 @@ This software is released under a specialized copyright license.
 * ntpd configfile::             configfile option (-c)
 * ntpd debug-level::            debug-level option (-d)
 * ntpd driftfile::              driftfile option (-f)
-* ntpd dvar::                   dvar option (-V)
+* ntpd dvar::                   dvar option
 * ntpd interface::              interface option (-I)
 * ntpd ipv4::                   ipv4 option (-4)
 * ntpd ipv6::                   ipv6 option (-6)
@@ -39,17 +39,20 @@ This software is released under a specialized copyright license.
 * ntpd nofork::                 nofork option (-n)
 * ntpd novirtualips::           novirtualips option (-L)
 * ntpd panicgate::              panicgate option (-g)
+* ntpd pccfreq::                pccfreq option
 * ntpd pidfile::                pidfile option (-p)
 * ntpd priority::               priority option (-P)
 * ntpd propagationdelay::       propagationdelay option (-r)
 * ntpd quit::                   quit option (-q)
+* ntpd saveconfigquit::         saveconfigquit option
 * ntpd set-debug-level::        set-debug-level option (-D)
 * ntpd slew::                   slew option (-x)
 * ntpd statsdir::               statsdir option (-s)
 * ntpd trustedkey::             trustedkey option (-t)
 * ntpd updateinterval::         updateinterval option (-U)
+* ntpd usepcc::                 usepcc option
 * ntpd user::                   user option (-u)
-* ntpd var::                    var option (-v)
+* ntpd var::                    var option
 @end menu
 
 @node ntpd usage
@@ -60,12 +63,15 @@ This is the automatically generated usage text for ntpd:
 
 @exampleindent 0
 @example
-ntpd - NTP daemon program - Ver. 4.2.5p134
+ntpd - NTP daemon program - Ver. 4.2.6p2
 USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
+                                - prohibits these options:
+                                ipv6
    -6 no  ipv6           Force IPv6 DNS name resolution
-                                - an alternate for ipv4
+                                - prohibits these options:
+                                ipv4
    -a no  authreq        Require crypto authentication
                                 - prohibits these options:
                                 authnoreq
@@ -74,26 +80,28 @@ USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
                                 authreq
    -b no  bcastsync      Allow us to sync to broadcast servers
    -c Str configfile     configuration file name
-   -d no  debug-level    Increase output debug message level
-                                - may appear multiple times
-   -D Str set-debug-level Set the output debug message level
-                                - may appear multiple times
+   -d --- debug-level    this package was built using 'configure --disable--debug'
+   -D --- set-debug-level this package was built using 'configure --disable--debug'
    -f Str driftfile      frequency drift file name
    -g no  panicgate      Allow the first adjustment to be Big
-   -I Str interface      Listen on the specified interface or IP
+                                - may appear multiple times
+   -i Str jaildir        Jail directory
+   -I Str interface      Listen on an interface name or address
                                 - may appear multiple times
    -k Str keyfile        path to symmetric keys
    -l Str logfile        path to the log file
-   -L no  novirtualips   Do not listen to virtual IPs
+   -L no  novirtualips   Do not listen to virtual interfaces
    -n no  nofork         Do not fork
    -N no  nice           Run at high priority
    -p Str pidfile        path to the PID file
    -P Num priority       Process priority
    -q no  quit           Set the time and quit
    -r Str propagationdelay Broadcast/propagation delay
+      Str saveconfigquit Save parsed configuration and quit
    -s Str statsdir       Statistics file location
    -t Str trustedkey     Trusted key number
                                 - may appear multiple times
+   -u Str user           Run as userid (or userid:groupid)
    -U Num updateinterval interval in seconds between scans for new or dropped interfaces
       Str var            make ARG an ntp variable (RW)
                                 - may appear multiple times
@@ -101,7 +109,7 @@ USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
                                 - may appear multiple times
    -x no  slew           Slew up to 600 seconds
       opt version        Output version information and exit
-   -? no  help           Display usage information and exit
+   -? no  help           Display extended usage information and exit
    -! no  more-help      Extended usage information passed thru pager
 
 Options are specified by doubled hyphens and their name
@@ -125,7 +133,8 @@ This is the ``force ipv4 dns name resolution'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-is a member of the ipv4 class of options.
+must not appear in combination with any of the following options:
+ipv6.
 @end itemize
 
 Force DNS resolution of following host names on the command line
@@ -140,7 +149,8 @@ This is the ``force ipv6 dns name resolution'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-is a member of the ipv4 class of options.
+must not appear in combination with any of the following options:
+ipv4.
 @end itemize
 
 Force DNS resolution of following host names on the command line
@@ -248,6 +258,13 @@ file.
 @cindex ntpd-panicgate
 
 This is the ``allow the first adjustment to be big'' option.
+
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+may appear an unlimited number of times.
+@end itemize
+
 Normally,
 ntpd
 exits with a message to the system log if the offset exceeds the panic threshold, which is 1000 s by default. This option allows the time to be set to any value without restriction; however, this can happen only once. If the threshold is exceeded after that,
@@ -266,19 +283,33 @@ configuration file directive for other options.
 @cindex ntpd-jaildir
 
 This is the ``jail directory'' option.
+
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+must be compiled in by defining @code{HAVE_DROPROOT} during the compilation.
+@end itemize
+
 Chroot the server to the directory
 jaildir
 .
-This option also implies that the server attempts to drop root privileges at startup (otherwise, chroot gives very little additional security), and it is only available if the OS supports to run the server without full root privileges.
+This option also implies that the server attempts to drop root privileges at startup.
 You may need to also specify a
 -u
 option.
+This option is only available if the OS supports adjusting the clock
+without full root privileges.
+This option is supported under NetBSD (configure with
+--enable-clockctl
+) and Linux (configure with
+--enable-linuxcaps
+).
 
 @node ntpd interface
 @subsection interface option (-I)
 @cindex ntpd-interface
 
-This is the ``listen on interface'' option.
+This is the ``listen on an interface name or address'' option.
 
 This option has some usage constraints.  It:
 @itemize @bullet
@@ -286,7 +317,11 @@ This option has some usage constraints.  It:
 may appear an unlimited number of times.
 @end itemize
 
-
+Open the network address given, or all the addresses associated with the
+given interface name.  This option may appear multiple times.  This option
+also implies not opening other addresses, except wildcard and localhost.
+This option is deprecated. Please consider using the configuration file
+interface command, which is more versatile. 
 
 @node ntpd keyfile
 @subsection keyfile option (-k)
@@ -315,8 +350,11 @@ configuration file directive.
 @subsection novirtualips option (-L)
 @cindex ntpd-novirtualips
 
-This is the ``do not listen to virtual ips'' option.
-Do not listen to virtual IPs. The default is to listen.
+This is the ``do not listen to virtual interfaces'' option.
+Do not listen to virtual interfaces, defined as those with
+names containing a colon.  This option is deprecated.  Please
+consider using the configuration file interface command, which
+is more versatile.
 
 @node ntpd modifymmtimer
 @subsection modifymmtimer option (-M)
@@ -330,7 +368,9 @@ This option has some usage constraints.  It:
 must be compiled in by defining @code{SYS_WINNT} during the compilation.
 @end itemize
 
-Set the Windows Multimedia Timer to highest resolution.
+Set the Windows Multimedia Timer to highest resolution.  This
+ensures the resolution does not change while ntpd is running,
+avoiding timekeeping glitches associated with changes.
 
 @node ntpd nofork
 @subsection nofork option (-n)
@@ -394,15 +434,21 @@ Note: The kernel time discipline is disabled with this option.
 This is the ``broadcast/propagation delay'' option.
 Specify the default propagation delay from the broadcast/multicast server to this client. This is necessary only if the delay cannot be computed automatically by the protocol.
 
-@node ntpd updateinterval
-@subsection updateinterval option (-U)
-@cindex ntpd-updateinterval
+@node ntpd saveconfigquit
+@subsection saveconfigquit option
+@cindex ntpd-saveconfigquit
 
-This is the ``interval in seconds between scans for new or dropped interfaces'' option.
-Give the time in seconds between two scans for new or dropped interfaces.
-For systems with routing socket support the scans will be performed shortly after the interface change
-has been detected by the system.
-Use 0 to disable scanning.
+This is the ``save parsed configuration and quit'' option.
+
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+must be compiled in by defining @code{SAVECONFIG} during the compilation.
+@end itemize
+
+Cause ntpd to parse its startup configuration file and save an
+equivalent to the given filename and exit.  This option was
+designed for automated testing.
 
 @node ntpd statsdir
 @subsection statsdir option (-s)
@@ -433,16 +479,34 @@ Add a key number to the trusted key list.
 @cindex ntpd-user
 
 This is the ``run as userid (or userid:groupid)'' option.
+
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+must be compiled in by defining @code{HAVE_DROPROOT} during the compilation.
+@end itemize
+
 Specify a user, and optionally a group, to switch to.
-This option is only available if the OS supports to run the server without full root privileges.
-Currently, this option is supported under NetBSD (configure with
+This option is only available if the OS supports adjusting the clock
+without full root privileges.
+This option is supported under NetBSD (configure with
 --enable-clockctl
 ) and Linux (configure with
 --enable-linuxcaps
 ).
 
+@node ntpd updateinterval
+@subsection updateinterval option (-U)
+@cindex ntpd-updateinterval
+
+This is the ``interval in seconds between scans for new or dropped interfaces'' option.
+Give the time in seconds between two scans for new or dropped interfaces.
+For systems with routing socket support the scans will be performed shortly after the interface change
+has been detected by the system.
+Use 0 to disable scanning. 60 seconds is the minimum time between scans.
+
 @node ntpd var
-@subsection var option (-v)
+@subsection var option
 @cindex ntpd-var
 
 This is the ``make arg an ntp variable (rw)'' option.
@@ -456,7 +520,7 @@ may appear an unlimited number of times.
 
 
 @node ntpd dvar
-@subsection dvar option (-V)
+@subsection dvar option
 @cindex ntpd-dvar
 
 This is the ``make arg an ntp variable (rw|def)'' option.
@@ -487,3 +551,36 @@ See the
 tinker
 configuration file directive for other options.
 Note: The kernel time discipline is disabled with this option.
+
+@node ntpd usepcc
+@subsection usepcc option
+@cindex ntpd-usepcc
+
+This is the ``use cpu cycle counter (windows only)'' option.
+
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+must be compiled in by defining @code{SYS_WINNT} during the compilation.
+@end itemize
+
+Attempt to substitute the CPU counter for QueryPerformanceCounter.
+The CPU counter and QueryPerformanceCounter are compared, and if
+they have the same frequency, the CPU counter (RDTSC on x86) is
+used directly, saving the overhead of a system call.
+
+@node ntpd pccfreq
+@subsection pccfreq option
+@cindex ntpd-pccfreq
+
+This is the ``force cpu cycle counter use (windows only)'' option.
+
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+must be compiled in by defining @code{SYS_WINNT} during the compilation.
+@end itemize
+
+Force substitution the CPU counter for QueryPerformanceCounter.
+The CPU counter (RDTSC on x86) is used unconditionally with the
+given frequency (in Hz).

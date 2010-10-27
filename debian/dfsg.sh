@@ -1,16 +1,12 @@
 #!/bin/sh
 # Used to create the dfsg .orig.tar from the upstream source
-rm -r arlib
 rm -r ElectricFence
 rm -r sntp
 rm util/ansi2knr.c
 rm util/ansi2knr.1
-rm html/build/hints/solaris-dosynctodr.html
+rm html/hints/solaris-dosynctodr.html
 rm libntp/adjtime.c
 rm include/adjtime.h
-rm include/rsa_md5.h
-rm include/global.h
-rm libntp/md5c.c
 rm include/timepps-SCO.h
 rm include/timepps-Solaris.h
 rm include/timepps-SunOS.h

@@ -1,5 +1,5 @@
 NTPDATE_CONF=/etc/default/ntpdate
-NTPDATE_DHCP_CONF=/etc/default/ntpdate.dhcp
+NTPDATE_DHCP_CONF=/var/lib/ntpdate/default.dhcp
 
 
 ntp_servers_setup_remove() {

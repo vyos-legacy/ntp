@@ -4,11 +4,11 @@
  *  as int and u_int.
  *  For 32 bit systems, define them as long and u_long
  */
+#ifndef NTP_TYPES_H
+#define NTP_TYPES_H
+
 #include <sys/types.h>
 #include "ntp_machine.h"
-
-#ifndef _NTP_TYPES_
-#define _NTP_TYPES_
 
 /*
  * This is another naming conflict.
@@ -23,15 +23,16 @@
 #endif
 
 /*
- * Set up for prototyping
+ * used to quiet compiler warnings
  */
-#ifndef P
-#if defined(__STDC__) || defined(HAVE_PROTOTYPES)
-#define	P(x)	x
-#else /* not __STDC__ and not HAVE_PROTOTYPES */
-#define P(x)	()
-#endif /* not __STDC__ and HAVE_PROTOTYPES */
-#endif /* P */
+#ifndef UNUSED_ARG
+#define UNUSED_ARG(arg)	((void)(arg))
+#endif
+
+/*
+ * COUNTOF(array) - size of array in elements
+ */
+#define COUNTOF(arr)	(sizeof(arr) / sizeof((arr)[0]))
 
 /*
  * VMS DECC (v4.1), {u_char,u_short,u_long} are only in SOCKET.H,
@@ -55,15 +56,15 @@ typedef unsigned int u_int;
 # endif
 #else /* not sizeof(int) == 4 */
 # if (SIZEOF_LONG == 4)
-# else /* not sizeof(long) == 4 */
 #  ifndef int32
 #   define int32 long
 #  endif
 #  ifndef u_int32
 #   define u_int32 unsigned long
 #  endif
+# else /* not sizeof(long) == 4 */
+#  include "Bletch: what's 32 bits on this machine?"
 # endif /* not sizeof(long) == 4 */
-# include "Bletch: what's 32 bits on this machine?"
 #endif /* not sizeof(int) == 4 */
 
 typedef u_char		ntp_u_int8_t;
@@ -76,5 +77,29 @@ typedef unsigned short associd_t; /* association ID */
 typedef u_int32 keyid_t;	/* cryptographic key ID */
 typedef u_int32 tstamp_t;	/* NTP seconds timestamp */
 
-#endif /* _NTP_TYPES_ */
+/*
+ * On Unix struct sock_timeval is equivalent to struct timeval.
+ * On Windows built with 64-bit time_t, sock_timeval.tv_sec is a long
+ * as required by Windows' socket() interface timeout argument, while
+ * timeval.tv_sec is time_t for the more common use as a UTC time 
+ * within NTP.
+ */
+#ifndef SYS_WINNT
+#define	sock_timeval	timeval
+#endif
 
+/*
+ * On Unix open() works for tty (serial) devices just fine, while on
+ * Windows refclock serial devices are opened using CreateFile, a lower
+ * level than the CRT-provided descriptors, because the C runtime lacks
+ * tty APIs.  For refclocks which wish to use open() as well as or 
+ * instead of refclock_open(), tty_open() is equivalent to open() on
+ * Unix and  implemented in the Windows port similarly to
+ * refclock_open().
+ */
+#ifndef SYS_WINNT
+#define tty_open(f, a, m)	open(f, a, m)
+#endif
+
+
+#endif	/* NTP_TYPES_H */

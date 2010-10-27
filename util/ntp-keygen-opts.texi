@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.texi)
 # 
-# It has been AutoGen-ed  Thursday January  8, 2009 at 06:19:38 AM EST
+# It has been AutoGen-ed  July  9, 2010 at 02:25:49 AM by AutoGen 5.10
 # From the definitions    ntp-keygen-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -25,7 +25,6 @@ This software is released under a specialized copyright license.
 * ntp-keygen certificate::            certificate option (-c)
 * ntp-keygen debug-level::            debug-level option (-d)
 * ntp-keygen get-pvt-passwd::         get-pvt-passwd option (-q)
-* ntp-keygen gq-keys::                gq-keys option (-g)
 * ntp-keygen gq-params::              gq-params option (-G)
 * ntp-keygen host-key::               host-key option (-H)
 * ntp-keygen id-key::                 id-key option (-e)
@@ -52,7 +51,7 @@ This is the automatically generated usage text for ntp-keygen:
 @exampleindent 0
 @example
 Using OpenSSL version 90704f
-ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.5p134
+ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.6p2
 USAGE:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -c Str certificate    certificate scheme
@@ -67,7 +66,7 @@ USAGE:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
    -i Str issuer-name    set issuer name
    -M no  md5key         generate MD5 keys
    -m Num modulus        modulus
-                                  it must lie in the range: 256 to 2048
+                                - it must be:  256 to 2048
    -P no  pvt-cert       generate PC private certificate
    -p Str pvt-passwd     output private password
    -q Str get-pvt-passwd input private password
@@ -77,7 +76,7 @@ USAGE:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
    -V Num mv-params      generate <num> MV parameters
    -v Num mv-keys        update <num> MV keys
       opt version        Output version information and exit
-   -? no  help           Display usage information and exit
+   -? no  help           Display extended usage information and exit
    -! no  more-help      Extended usage information passed thru pager
    -> opt save-opts      Save the option state to a config file
    -< Str load-opts      Load options from a config file
@@ -88,7 +87,7 @@ Options are specified by doubled hyphens and their name
 or by a single hyphen and the flag character.
 
 The following option preset mechanisms are supported:
- - reading file /users/stenn/.ntprc
+ - reading file /deacon/users/stenn/.ntprc
  - reading file /deacon/backroom/snaps/ntp-stable/util/.ntprc
  - examining environment variables named NTP_KEYGEN_*
 
@@ -111,7 +110,14 @@ This option has some usage constraints.  It:
 must be compiled in by defining @code{OPENSSL} during the compilation.
 @end itemize
 
-Just some descriptive text.
+scheme is one of
+RSA-MD2, RSA-MD5, RSA-SHA, RSA-SHA1, RSA-MDC2, RSA-RIPEMD160,
+DSA-SHA, or DSA-SHA1.
+
+Select the certificate message digest/signature encryption scheme.
+Note that RSA schemes must be used with a RSA sign key and DSA
+schemes must be used with a DSA sign key.  The default without
+this option is RSA-MD5.
 
 @node ntp-keygen debug-level
 @subsection debug-level option (-d)
@@ -123,8 +129,6 @@ This option has some usage constraints.  It:
 @itemize @bullet
 @item
 may appear an unlimited number of times.
-@item
-must be compiled in by defining @code{DEBUG} during the compilation.
 @end itemize
 
 Increase the debugging message output level.
@@ -139,8 +143,6 @@ This option has some usage constraints.  It:
 @itemize @bullet
 @item
 may appear an unlimited number of times.
-@item
-must be compiled in by defining @code{DEBUG} during the compilation.
 @end itemize
 
 Set the output debugging level.  Can be supplied multiple times,
@@ -150,7 +152,7 @@ but each overrides the previous value(s).
 @subsection id-key option (-e)
 @cindex ntp-keygen-id-key
 
-This is the ``write identity keys'' option.
+This is the ``write iff or gq identity keys'' option.
 
 This option has some usage constraints.  It:
 @itemize @bullet
@@ -158,7 +160,8 @@ This option has some usage constraints.  It:
 must be compiled in by defining @code{OPENSSL} during the compilation.
 @end itemize
 
-Just some descriptive text.
+Write the IFF or GQ client keys to the standard output.  This is
+intended for automatic key distribution by mail.
 
 @node ntp-keygen gq-params
 @subsection gq-params option (-G)
@@ -172,21 +175,8 @@ This option has some usage constraints.  It:
 must be compiled in by defining @code{OPENSSL} during the compilation.
 @end itemize
 
-Just some descriptive text.
-
-@node ntp-keygen gq-keys
-@subsection gq-keys option (-g)
-@cindex ntp-keygen-gq-keys
-
-This is the ``update gq keys'' option.
-
-This option has some usage constraints.  It:
-@itemize @bullet
-@item
-must be compiled in by defining @code{OPENSSL} during the compilation.
-@end itemize
-
-Just some descriptive text.
+Generate parameters and keys for the GQ identification scheme,
+obsoleting any that may exist.
 
 @node ntp-keygen host-key
 @subsection host-key option (-H)
@@ -200,7 +190,7 @@ This option has some usage constraints.  It:
 must be compiled in by defining @code{OPENSSL} during the compilation.
 @end itemize
 
-Just some descriptive text.
+Generate new host keys, obsoleting any that may exist.
 
 @node ntp-keygen iffkey
 @subsection iffkey option (-I)
@@ -214,7 +204,8 @@ This option has some usage constraints.  It:
 must be compiled in by defining @code{OPENSSL} during the compilation.
 @end itemize
 
-Just some descriptive text.
+Generate parameters for the IFF identification scheme, obsoleting
+any that may exist.
 
 @node ntp-keygen issuer-name
 @subsection issuer-name option (-i)
@@ -228,14 +219,15 @@ This option has some usage constraints.  It:
 must be compiled in by defining @code{OPENSSL} during the compilation.
 @end itemize
 
-Just some descriptive text.
+Set the suject name to name.  This is used as the subject field
+in certificates and in the file name for host and sign keys.
 
 @node ntp-keygen md5key
 @subsection md5key option (-M)
 @cindex ntp-keygen-md5key
 
 This is the ``generate md5 keys'' option.
-Just some descriptive text.
+Generate MD5 keys, obsoleting any that may exist.
 
 @node ntp-keygen modulus
 @subsection modulus option (-m)
@@ -249,7 +241,7 @@ This option has some usage constraints.  It:
 must be compiled in by defining @code{OPENSSL} during the compilation.
 @end itemize
 
-Just some descriptive text.
+The number of bits in the prime modulus.  The default is 512.
 
 @node ntp-keygen pvt-cert
 @subsection pvt-cert option (-P)
@@ -263,7 +255,8 @@ This option has some usage constraints.  It:
 must be compiled in by defining @code{OPENSSL} during the compilation.
 @end itemize
 
-Just some descriptive text.
+Generate a private certificate.  By default, the program generates
+public certificates.
 
 @node ntp-keygen pvt-passwd
 @subsection pvt-passwd option (-p)
@@ -277,7 +270,8 @@ This option has some usage constraints.  It:
 must be compiled in by defining @code{OPENSSL} during the compilation.
 @end itemize
 
-Just some descriptive text.
+Encrypt generated files containing private data with the specified
+password and the DES-CBC algorithm.
 
 @node ntp-keygen get-pvt-passwd
 @subsection get-pvt-passwd option (-q)
@@ -291,7 +285,7 @@ This option has some usage constraints.  It:
 must be compiled in by defining @code{OPENSSL} during the compilation.
 @end itemize
 
-Just some descriptive text.
+Set the password for reading files to the specified password.
 
 @node ntp-keygen sign-key
 @subsection sign-key option (-S)
@@ -305,7 +299,9 @@ This option has some usage constraints.  It:
 must be compiled in by defining @code{OPENSSL} during the compilation.
 @end itemize
 
-Just some descriptive text.
+Generate a new sign key of the designated type, obsoleting any
+that may exist.  By default, the program uses the host key as the
+sign key.
 
 @node ntp-keygen subject-name
 @subsection subject-name option (-s)
@@ -319,7 +315,8 @@ This option has some usage constraints.  It:
 must be compiled in by defining @code{OPENSSL} during the compilation.
 @end itemize
 
-Just some descriptive text.
+Set the issuer name to name.  This is used for the issuer field
+in certificates and in the file name for identity files.
 
 @node ntp-keygen trusted-cert
 @subsection trusted-cert option (-T)
@@ -333,7 +330,8 @@ This option has some usage constraints.  It:
 must be compiled in by defining @code{OPENSSL} during the compilation.
 @end itemize
 
-Just some descriptive text.
+Generate a trusted certificate.  By default, the program generates
+a non-trusted certificate.
 
 @node ntp-keygen mv-params
 @subsection mv-params option (-V)
@@ -347,7 +345,8 @@ This option has some usage constraints.  It:
 must be compiled in by defining @code{OPENSSL} during the compilation.
 @end itemize
 
-Just some descriptive text.
+Generate parameters and keys for the Mu-Varadharajan (MV)
+identification scheme.
 
 @node ntp-keygen mv-keys
 @subsection mv-keys option (-v)
@@ -361,4 +360,4 @@ This option has some usage constraints.  It:
 must be compiled in by defining @code{OPENSSL} during the compilation.
 @end itemize
 
-Just some descriptive text.
+This option has no @samp{doc} documentation.

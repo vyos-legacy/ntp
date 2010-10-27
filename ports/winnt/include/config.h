@@ -1,64 +1,47 @@
 /* config.h for Windows NT */
 
-#ifndef __CONFIG_H
-#define __CONFIG_H
+#ifndef CONFIG_H
+#define CONFIG_H
 
 /*
- * IPv6 requirements
+ * For newer compilers we may we want newer prototypes from Windows
+ * so we target _WIN32_WINNT at WINXP, but we also want our binary to
+ * run on NT 4, so newer functions are runtime linked and the linker
+ * /version:0x0400 * switch is used to override the .exe file minimum
+ * version. For older compilers we leave it at NT 4.0.
  */
-/*
- * For VS.NET most of the IPv6 types and structures are defined
- */
-#if _MSC_VER > 1200
-#define HAVE_STRUCT_SOCKADDR_STORAGE
-#define ISC_PLATFORM_HAVEIPV6
-#define ISC_PLATFORM_HAVEIN6PKTINFO
-#define NO_OPTION_NAME_WARNINGS
-#else
-typedef int socklen_t;	/* VS 6.0 doesn't know about socklen_t */
+#ifndef _WIN32_WINNT
+#if _MSC_VER > 1400		/* At least VS 2005 */
+#define _WIN32_WINNT 0x0501
+#else				/* NT 4.0 */
+#define _WIN32_WINNT 0x0400 
+#endif
 #endif
 
-/*
- * Some types don't exist in VS V6
- */
-#if _MSC_VER < 1300
-typedef unsigned int	uintptr_t;
-#endif
 
-#define ISC_PLATFORM_NEEDIN6ADDRANY
-#define HAVE_SOCKADDR_IN6
-
-/*
- * The type of the socklen_t defined for getnameinfo() and getaddrinfo()
- * is int for VS compilers on Windows but the type is already declared 
- */
-#define GETSOCKNAME_SOCKLEN_TYPE socklen_t
-/*
- * An attempt to cut down the number of warnings generated during compilation.
- * All of these should be benign to disable.
- */
-
-#pragma warning(disable: 4100) /* unreferenced formal parameter */
-#pragma warning(disable: 4101) /* unreferenced local variable */
-#pragma warning(disable: 4127) /* conditional expression is constant */
-
-/*
- * Windows NT Configuration Values
- */
-#if defined _DEBUG /* Use VC standard macro definitions */
-# define DEBUG 1
-#endif
-#if !defined _WIN32_WINNT || _WIN32_WINNT < 0x0400
-# error Please define _WIN32_WINNT in the project settings/makefile
-#endif
-
-#define __windows__ 1
+#define _CRT_SECURE_NO_DEPRECATE 1
 /*
  * ANSI C compliance enabled
  */
 #define __STDC__ 1
-/* Define if you have the ANSI C header files.  */
-#define STDC_HEADERS 1
+
+/*
+ * Enable the debug build of MS C runtime to dump leaks
+ * at exit time (currently only if run under a debugger).
+ */
+#if defined(_MSC_VER) && defined(_DEBUG)
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <malloc.h>
+#include <crtdbg.h>
+/* #define MALLOC_LINT */	/* defers free() */
+#endif
+
+/*
+ * We need to include stdio.h first before we #define snprintf
+ * otherwise we can get errors during the build
+ */
+#include <stdio.h>
 
 /* Prevent inclusion of winsock.h in windows.h */
 #ifndef _WINSOCKAPI_
@@ -77,63 +60,221 @@ typedef unsigned int	uintptr_t;
  * code so we don't have to see the warning messages
  */
 #ifndef _WSPIAPI_H_
-#define _WSPIAPI_H_
+/* #define _WSPIAPI_H_ */ /* need these wrappers for ntpd.exe to load on w2k */
 #endif
 
-#define OPEN_BCAST_SOCKET	1 /* for	ntp_io.c */
-#define TYPEOF_IP_MULTICAST_LOOP BOOL												
-#define SETSOCKOPT_ARG_CAST (const char *)
+/*
+ * On Unix struct sock_timeval is equivalent to struct timeval.
+ * On Windows built with 64-bit time_t, sock_timeval.tv_sec is a long
+ * as required by Windows' socket() interface timeout argument, while
+ * timeval.tv_sec is time_t for the more common use as a UTC time 
+ * within NTP.
+ *
+ * winsock.h unconditionally defines struct timeval with long tv_sec
+ * instead of time_t tv_sec.  We redirect its declaration to struct 
+ * sock_timeval instead of struct timeval with a #define.
+ */
+#define	timeval sock_timeval
+
+/* Include Windows headers */
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+
+#undef timeval	/* see sock_timeval #define and comment above */
+
+/*
+ * Some definitions we are using are missing in the headers
+ * shipping with VC6. However, if the SDK is installed then the 
+ * SDK's headers may declare the missing types. This is at least 
+ * the case in the Oct 2001 SDK. That SDK and all subsequent 
+ * versions also define the symbol _W64, so we can use that one
+ * to determine whether some types need to be defined, or not.
+ */
+#ifdef _W64
+/* VC6 can include wspiapi.h only if the SDK is installed */
+#include <wspiapi.h>
+#endif
+
+#undef interface
+#include <process.h>
+#include <time.h>		/* time_t for timeval decl */
+
+/* ---------------------------------------------------------------------
+ * Above this line are #include lines and the few #define lines
+ * needed before including headers.
+ */
+
+struct timeval {
+	time_t	tv_sec;
+	long	tv_usec;
+};
+
+/*
+ * On Unix open() works for tty (serial) devices just fine, while on
+ * Windows refclock serial devices are opened using CreateFile, a lower
+ * level than the CRT-provided descriptors, because the C runtime lacks
+ * tty APIs.  For refclocks which wish to use open() as well as or 
+ * instead of refclock_open(), tty_open() is equivalent to open() on
+ * Unix and  implemented in the Windows port similarly to
+ * refclock_open().
+ */
+extern int tty_open(char *, int, int);
+
+/*
+ * disable use of __declspec(dllexport) by libisc routines
+ */
+#define ISC_STATIC_WIN	1
+
+/*
+ * ntp_rfc2553.h has cruft under #ifdef SYS_WINNT which is
+ * appropriate for older Microsoft IPv6 definitions, such
+ * as in_addr6 being the struct type.  We can differentiate
+ * the RFC2553-compliant newer headers because they have
+ *   #define in_addr6 in6_addr
+ * for backward compatibility.  With the newer headers,
+ * we define ISC_PLATFORM_HAVEIPV6 and disable the cruft.
+ */
+#ifdef in_addr6
+#define WANT_IPV6
+#define ISC_PLATFORM_HAVEIPV6
+#define ISC_PLATFORM_HAVESCOPEID
+#define HAVE_STRUCT_SOCKADDR_STORAGE
+#define ISC_PLATFORM_HAVEIN6PKTINFO
+#endif	/* in_addr6 / RFC2553-compliant IPv6 headers */
+
+#define NO_OPTION_NAME_WARNINGS
+
+#if !defined( _W64 )
+  /*
+   * if ULONG_PTR needs to be defined then the build environment
+   * is pure 32 bit Windows. Since ULONG_PTR and DWORD have 
+   * the same size in 32 bit Windows we can safely define
+   * a replacement.
+   */
+typedef DWORD ULONG_PTR;
+/* VC6 doesn't know about socklen_t, except if the SDK is installed */
+typedef int socklen_t;
+#endif	/* _W64 */
+
+#define ISC_PLATFORM_NEEDIN6ADDRANY
+#define HAVE_SOCKADDR_IN6
+
+/*
+ * The type of the socklen_t defined for getnameinfo() and getaddrinfo()
+ * is int for VS compilers on Windows but the type is already declared 
+ */
+#define GETSOCKNAME_SOCKLEN_TYPE socklen_t
+
+/*
+ * Older SDKs do not define SO_EXCLUSIVEADDRUSE in winsock2.h
+ */
+#ifndef SO_EXCLUSIVEADDRUSE
+#define SO_EXCLUSIVEADDRUSE ((int)(~SO_REUSEADDR))
+#endif
+
+/*
+ * Define this macro to control the behavior of connection
+ * resets on UDP sockets.  See Microsoft KnowledgeBase Article Q263823
+ * for details.
+ * Based on that article, it is surprising that a much newer winsock2.h
+ * does not define SIO_UDP_CONNRESET (the one that comes with VS 2008).
+ * NOTE: This requires that Windows 2000 systems install Service Pack 2
+ * or later.
+ */
+#ifndef SIO_UDP_CONNRESET 
+#define SIO_UDP_CONNRESET _WSAIOW(IOC_VENDOR,12) 
+#endif
+
+#if defined _MSC_VER && _MSC_VER < 1400
+/*
+ * Use 32-bit time definitions for versions prior to VS 2005
+ * VS 2005 defaults to 64-bit time
+ */
+# define SIZEOF_TIME_T 4
+#else
+# define SIZEOF_TIME_T 8
+#endif
+
+
+/*
+ * An attempt to cut down the number of warnings generated during compilation.
+ * All of these should be benign to disable.
+ */
+
+#pragma warning(disable: 4100) /* unreferenced formal parameter */
+#pragma warning(disable: 4127) /* conditional expression is constant */
+#pragma warning(disable: 4996) /* more secure replacement available */
+
+/*
+ * Windows NT Configuration Values
+ */
+#if defined _DEBUG /* Use VC standard macro definitions */
+# define DEBUG 1
+#endif
+
+#define __windows__ 1
+/* Define if you have the ANSI C header files.  */
+#define STDC_HEADERS 1
+
+#define OPEN_BCAST_SOCKET		1	/* for ntp_io.c */
+#define TYPEOF_IP_MULTICAST_LOOP	BOOL
+#define SETSOCKOPT_ARG_CAST		(const char *)
 #define HAVE_RANDOM 
-#define MAXHOSTNAMELEN 64
+#define MAXHOSTNAMELEN			64
 #define AUTOKEY
+#define SAVECONFIG			1
 
 /*
  * Multimedia timer enable
  */
 #define USE_MM_TIMER
-/*
- * Use 32-bit time definitions
- * VS 2005 defaults to 64-bit time
- * Leave commented out for now
- */
-//#define _USE_32BIT_TIME_T
 
 /* Enable OpenSSL */
 #define OPENSSL 1
 
 /*
- * Include standard stat information
- */
-#include <isc/stat.h>
-/*
- * Miscellaneous functions that Microsoft maps
+ * Keywords and functions that Microsoft maps
  * to other names
  */
-#define inline __inline
-#define vsnprintf _vsnprintf
-#define snprintf _snprintf
-#define stricmp _stricmp
-#define strcasecmp _stricmp
-#define isascii __isascii
-#define finite _finite
-#define random      rand
-#define srandom     srand
-#define fdopen	_fdopen
-#define read	_read
-#define open	_open
-#define close	_close
-#define write	_write
-#define strdup  _strdup
-#define stat    _stat       /* struct stat from <sys/stat.h> */
-#define unlink  _unlink
-#define fchmod( _x, _y );
-#define lseek   _lseek
-#define pipe    _pipe
-#define dup2    _dup2
-#define sleep(x) Sleep((DWORD) x * 1000 /* milliseconds */ );
+#define inline		__inline
+#define vsnprintf	_vsnprintf
+#define snprintf	_snprintf
+#define stricmp		_stricmp
+#define strcasecmp	_stricmp
+#define isascii		__isascii
+#define finite		_finite
+#define random		rand
+#define srandom		srand
+#define fdopen		_fdopen
+#define read		_read
+#define open		_open
+#ifndef close
+#define close		_close
+#endif
+#define write		_write
+#define strdup		_strdup
+#define stat		_stat		/*struct stat from  <sys/stat.h> */
+#define fstat		_fstat
+#define unlink		_unlink
+/*
+ * punt on fchmod on Windows
+ */
+#define fchmod(x,y)	{}
+#define lseek		_lseek
+#define pipe		_pipe
+#define dup2		_dup2
+/*
+ * scale, unix sleep is seconds, Windows Sleep is msec
+ */
+#define sleep(x)	Sleep((unsigned)(x) * 1000)
+#define fileno		_fileno
+#define isatty		_isatty
+#define mktemp		_mktemp
+#define getpid		_getpid
 
-#define pid_t	int		/* PID is an int */
-#define ssize_t	int		/* ssize is an int */
+typedef int pid_t;		/* PID is an int */
+typedef int ssize_t;		/* ssize is an int */
 typedef __int32 int32_t;	/* define a typedef for int32_t */
 #define HAVE_INT32_T   1
 
@@ -144,46 +285,52 @@ typedef __int32 int32_t;	/* define a typedef for int32_t */
 #define STDERR_FILENO	_fileno(stderr)
 
 /*
- * We need to include string.h first before we override strerror
- * otherwise we can get errors during the build
+ * To minimize Windows-specific changes to the rest of the NTP code,
+ * particularly reference clocks, ntp_stdlib.h will
+ *
+ * #define strerror(e) ntp_strerror(e)
+ *
+ * to deal with our mixture of C runtime (open, write) and Windows
+ * (sockets, serial ports) error codes.  This is an ugly hack because
+ * both use the lowest values differently, but particularly for ntpd,
+ * it's not a problem.
  */
-#include <string.h>
-/* Point to a local version for error string handling */
-# define strerror	NTstrerror
-
-char *NTstrerror(int errnum);
-
-int NT_set_process_priority(void);	/* Define this function */
+#define NTP_REDEFINE_STRERROR
 
 # define MCAST				/* Enable Multicast Support */
 # define MULTICAST_NONEWSOCKET		/* Don't create a new socket for mcast address */
 
 # define REFCLOCK			/* from ntpd.mak */
 
-# define CLOCK_LOCAL			/* from ntpd.mak */
-//# define CLOCK_PARSE 
-/* # define CLOCK_ATOM */
-/* # define CLOCK_SHM	*/		 /* from ntpd.mak */
+/* # define CLOCK_PARSE  */
+# define CLOCK_ARCRON_MSF
+# define OWN_PPS_NTP_TIMESTAMP_FROM_COUNTER	/* timepps.h */
+# define HAVE_TIMEPPS_H
+# define HAVE_PPSAPI
+# define CLOCK_ATOM
+# define CLOCK_CHRONOLOG
+# define CLOCK_DUMBCLOCK
 # define CLOCK_HOPF_SERIAL	/* device 38, hopf DCF77/GPS serial line receiver  */
 # define CLOCK_HOPF_PCI		/* device 39, hopf DCF77/GPS PCI-Bus receiver  */
+# define CLOCK_JUPITER
+# define CLOCK_LOCAL
 # define CLOCK_NMEA
+# define CLOCK_ONCORE
 # define CLOCK_PALISADE		/* from ntpd.mak */
-# define CLOCK_DUMBCLOCK
+/* # define CLOCK_SHM */
+# define CLOCK_SPECTRACOM	/* refclock_wwvb.c */
 # define CLOCK_TRIMBLEDC
 # define CLOCK_TRIMTSIP 1
-# define CLOCK_JUPITER
 
 # define NTP_LITTLE_ENDIAN		/* from libntp.mak */
 # define NTP_POSIX_SOURCE
 
 # define SYSLOG_FILE			/* from libntp.mak */
-# define SYSV_TIMEOFDAY 		/* for ntp_unixtime.h */
+# define HAVE_GETCLOCK
 
-# define SIZEOF_SIGNED_CHAR 1
-# define SIZEOF_TIME_T 4
-# define SIZEOF_INT 4			/* for ntp_types.h */
+# define SIZEOF_SIGNED_CHAR	1
+# define SIZEOF_INT		4	/* for ntp_types.h */
 
-//# define HAVE_NET_IF_H
 # define QSORT_USES_VOID_P
 # define HAVE_SETVBUF
 # define HAVE_VSPRINTF
@@ -196,33 +343,111 @@ int NT_set_process_priority(void);	/* Define this function */
 # define HAVE_STDARG_H
 # define HAVE_NO_NICE
 # define HAVE_MKTIME
+# define HAVE_STRUCT_TIMESPEC
 # define TIME_WITH_SYS_TIME
 # define HAVE_IO_COMPLETION_PORT
 # define ISC_PLATFORM_NEEDNTOP
 # define ISC_PLATFORM_NEEDPTON
 # define HAVE_VPRINTF
 
-#define HAVE_LIMITS_H   1
-#define HAVE_STRDUP     1
-#define HAVE_STRCHR     1
-#define HAVE_FCNTL_H    1
+#define HAVE_LIMITS_H	1
+#define HAVE_STRDUP	1
+#define HAVE_STRCHR	1
+#define HAVE_FCNTL_H	1
+#define HAVE_SYS_RESOURCE_H
+#define HAVE_BSD_NICE			/* emulate BSD setpriority() */
 
+typedef char *caddr_t;
 
-# define NEED_S_CHAR_TYPEDEF
+#ifdef _WCTYPE_T_DEFINED	/* see vc/include/crtdefs.h */
+#define HAVE_WINT_T
+#endif
 
-# define USE_PROTOTYPES 		/* for ntp_types.h */														
+#ifndef _INTPTR_T_DEFINED
+typedef long intptr_t;
+#define _INTPTR_T_DEFINED
+#endif
+#define HAVE_INTPTR_T
+
+#ifndef _UINTPTR_T_DEFINED
+typedef unsigned long uintptr_t;
+#define _UINTPTR_T_DEFINED
+#endif
+#define HAVE_UINTPTR_T
+
+#if !defined( _W64 )
+  /*
+   * if DWORD_PTR needs to be defined then the build environment
+   * is pure 32 bit Windows. Since DWORD_PTR and DWORD have 
+   * the same size in 32 bit Windows we can safely define
+   * a replacement.
+   */
+  typedef DWORD DWORD_PTR;
+#endif
+
+#define NEED_S_CHAR_TYPEDEF
+
+#define USE_PROTOTYPES 		/* for ntp_types.h */
+
+/* Directory separator, usually / or \ */
+#define	DIR_SEP	'\\'
+
 
 #define ULONG_CONST(a) a ## UL
 
-# define NOKMEM
-# define RETSIGTYPE void
-# ifndef STR_SYSTEM
-#  define STR_SYSTEM "WINDOWS/NT"
-# endif
+#define NOKMEM
+#define RETSIGTYPE void
+
+#ifndef STR_SYSTEM
+#define STR_SYSTEM "Windows"
+#endif
+
+#ifndef STR_PROCESSOR
+
+#define STRINGIZE(arg)	#arg
+
+#ifdef _M_IX86
+#ifndef _M_IX86_FP
+#define STR_PROCESSOR "x86"
+#else
+#if !_M_IX86_FP 
+#define STR_PROCESSOR "x86"
+#else 
+#if _M_IX86_FP > 2
+#define STR_PROCESSOR "x86-FP-" STRINGIZE(_M_IX86_FP)
+#else
+#if _M_IX86_FP == 2
+#define STR_PROCESSOR "x86-SSE2"
+#else
+#define STR_PROCESSOR "x86-SSE"
+#endif /* _M_IX86 == 2 */
+#endif /* _M_IX86_FP > 2 */
+#endif /* !_M_IX86_FP */
+#endif /* !defined(_M_IX86_FP) */
+#endif /* !defined(_M_IX86) */
+
+#ifdef _M_IA64
+#define STR_PROCESSOR "Itanium"
+#endif
+
+#ifdef _M_X64
+#define STR_PROCESSOR "x64"
+#endif
+
+#endif /* !defined(STR_PROCESSOR) */
+
 #define  SIOCGIFFLAGS SIO_GET_INTERFACE_LIST /* used in ntp_io.c */
+/*
+ * Below this line are includes which must happen after the bulk of
+ * config.h is processed.  If you need to add another #include to this
+ * file the preferred location is near the top, above the similar
+ * line of hyphens.
+ * ---------------------------------------------------------------------
+ */
 
-/* Include Windows headers */
-#include <windows.h>
-#include <winsock2.h>
+/*
+ * Include standard stat information
+ */
+#include <isc/stat.h>
 
-#endif /* __config */
+#endif /* CONFIG_H */

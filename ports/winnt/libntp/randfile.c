@@ -3,12 +3,7 @@
  * so that OpenSSL can work properly and securely.
  */
 
-/* Skip asynch rpc inclusion */
-#ifndef __RPCASYNC_H__
-#define __RPCASYNC_H__
-#endif
-
-#include <windows.h>
+#include <config.h>
 #include <wincrypt.h>
 
 #include <stdio.h>
@@ -44,8 +39,9 @@ init_randfile()
 	 * a .rnd file is in there.
 	 */
 	homedir = getenv("HOME");
-	if (homedir != NULL) {
-		strcpy(tmp, homedir);
+	if (homedir != NULL &&
+	    (strlen(homedir) + 5 /* \.rnd */) < sizeof(tmp)) {
+		strncpy(tmp, homedir, sizeof(tmp));
 		strcat(tmp, "\\.rnd");
 		rf = fopen(tmp, "rb");
 		if (rf != NULL) {

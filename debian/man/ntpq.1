@@ -4,7 +4,7 @@
 ntpq \- standard NTP query program
 .SH SYNOPSIS
 .B ntpq
-[-inp] [-c \fIcommand\fR] [\fIhost\fR] [...]
+[\-inp] [\-c \fIcommand\fR] [\fIhost\fR] [...]
 .SH DESCRIPTION
 The ntpq utility program is used to monitor NTP daemon ntpd operations and determine performance. It uses the standard NTP mode 6 control message formats defined in Appendix B of the NTPv3 specification RFC1305. The same formats are used in NTPv4, although some of the variables have changed and new ones added. The description on this page is for the NTPv4 variables.
 .PP
@@ -14,27 +14,27 @@ If one or more request options is included on the command line when ntpq is exec
 .PP
 ntpq uses NTP mode 6 packets to communicate with the NTP server, and hence can be used to query any compatible server on the network which permits it. Note that since NTP is a UDP protocol this communication will be somewhat unreliable, especially over large distances in terms of network topology. ntpq makes one attempt to retransmit requests, and will time requests out if the remote host is not heard from within a suitable timeout time.
 .PP
-Note that in contexts where a host name is expected, a -4 qualifier preceding the host name forces DNS resolution to the IPv4 namespace, while a -6 qualifier forces DNS resolution to the IPv6 namespace.
+Note that in contexts where a host name is expected, a \-4 qualifier preceding the host name forces DNS resolution to the IPv4 namespace, while a \-6 qualifier forces DNS resolution to the IPv6 namespace.
 .SH OPTIONS
-Command line options are described following. Specifying a command line option other than -i or -n will cause the specified query (queries) to be sent to the indicated host(s) immediately. Otherwise, ntpq will attempt to read interactive format commands from the standard input.
+Command line options are described following. Specifying a command line option other than \-i or \-n will cause the specified query (queries) to be sent to the indicated host(s) immediately. Otherwise, ntpq will attempt to read interactive format commands from the standard input.
 .TP
--4
+\-4
 Force DNS resolution of following host names on the command line to the IPv4 namespace.
 .TP
--6
+\-6
 Force DNS resolution of following host names on the command line to the IPv6 namespace.
 .TP
--c
-The following argument is interpreted as an interactive format command and is added to the list of commands to be executed on the specified host(s). Multiple -c options may be given.
+\-c
+The following argument is interpreted as an interactive format command and is added to the list of commands to be executed on the specified host(s). Multiple \-c options may be given.
 .TP
--i
+\-i
 Force ntpq to operate in interactive mode. Prompts will be written to the standard output and commands read from the standard input.
 .TP
--n
+\-n
 Output all host addresses in dotted-quad numeric format rather than converting to the canonical host names.
 .TP
--p
+\-p
 Print a list of the peers known to the server as well as a summary of their state. This is equivalent to the peers interactive command.
 .SH "SEE ALSO"
-.I /usr/share/doc/ntp-doc/html/ntpq.html
+.I /usr/share/doc/ntp\-doc/html/ntpq.html
 for the full documentation.

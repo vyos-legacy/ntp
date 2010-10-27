@@ -9,9 +9,7 @@
 # include <config.h>
 #endif
 
-#ifdef HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
+#include <sys/types.h>
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
@@ -42,8 +40,8 @@ static char separator = '/';
 extern	char *progname;
 
 /* Declare the local functions */
-void	addto_syslog	P((int, char *));
-void	format_errmsg   P((char *, int, const char *, int));
+void	addto_syslog	(int, char *);
+void	format_errmsg   (char *, int, const char *, int);
 
 
 /*
@@ -84,12 +82,12 @@ format_errmsg(char *nfmt, int lennfmt, const char *fmt, int errval)
 	register char c;
 	register char *n;
 	register const char *f;
-
+	size_t len;
 	char *err;
 
 	n = nfmt;
 	f = fmt;
-	while ((c = *f++) != '\0' && n < (nfmt+lennfmt - 2)) {
+	while ((c = *f++) != '\0' && n < (nfmt + lennfmt - 2)) {
 		if (c != '%') {
 			*n++ = c;
 			continue;
@@ -99,12 +97,13 @@ format_errmsg(char *nfmt, int lennfmt, const char *fmt, int errval)
 			*n++ = c;
 			continue;
 		}
-		err = 0;
 		err = strerror(errval);
+		len = strlen(err);
+
 		/* Make sure we have enough space for the error message */
-		if ((n + strlen(err)) < (nfmt + lennfmt -2)) {
-			strcpy(n, err);
-			n += strlen(err);
+		if ((n + len) < (nfmt + lennfmt - 2)) {
+			memcpy(n, err, len);
+			n += len;
 		}
 	}
 #if !defined(VMS)
@@ -113,18 +112,6 @@ format_errmsg(char *nfmt, int lennfmt, const char *fmt, int errval)
 	    *n++ = '\n';
 	*n = '\0';
 }
-
-/*
- * The externally called functions are defined here
- * but share the internal function above to fetch
- * any error message strings, This is done so that we can
- * have two different functions to perform the logging
- * since Windows gets it's error information from different
- * places depending on whether or not it's network I/O.
- * msyslog() is for general use while netsyslog() is for
- * network I/O functions. They are virtually identical
- * in implementation.
- */
 
 #if defined(__STDC__) || defined(HAVE_STDARG_H)
 void msyslog(int level, const char *fmt, ...)
@@ -141,54 +128,18 @@ void msyslog(int level, const char *fmt, ...)
 #endif
 	va_list ap;
 	char buf[1025], nfmt[256];
+	int errval;
 
 	/*
 	 * Save the error value as soon as possible
 	 */
+	errval = errno;
+
 #ifdef SYS_WINNT
-	int errval = GetLastError();
-#else
-	int errval = errno;
-#endif
-
-#if defined(__STDC__) || defined(HAVE_STDARG_H)
-	va_start(ap, fmt);
-#else
-	va_start(ap);
-
-	level = va_arg(ap, int);
-	fmt = va_arg(ap, char *);
-#endif
-	format_errmsg(nfmt, sizeof(nfmt), fmt, errval);
-
-	vsnprintf(buf, sizeof(buf), nfmt, ap);
-	addto_syslog(level, buf);
-	va_end(ap);
-}
-#if defined(__STDC__) || defined(HAVE_STDARG_H)
-void netsyslog(int level, const char *fmt, ...)
-#else /* defined(__STDC__) || defined(HAVE_STDARG_H) */
-     /*VARARGS*/
-     void netsyslog(va_alist)
-     va_dcl
-#endif /* defined(__STDC__) || defined(HAVE_STDARG_H) */
-{
-#if defined(__STDC__) || defined(HAVE_STDARG_H)
-#else
-	int level;
-	const char *fmt;
-#endif
-	va_list ap;
-	char buf[1025], nfmt[256];
-
-	/*
-	 * Save the error value as soon as possible
-	 */
-#ifdef SYS_WINNT
-	int errval = WSAGetLastError();
-#else
-	int errval = errno;
-#endif
+	errval = GetLastError();
+	if (NO_ERROR == errval)
+		errval = errno;
+#endif /* SYS_WINNT */
 
 #if defined(__STDC__) || defined(HAVE_STDARG_H)
 	va_start(ap, fmt);

@@ -14,13 +14,21 @@
 # include <sys/timex.h>
 #endif
 
+#if defined(ADJ_NANO) && !defined(MOD_NANO)
+#define MOD_NANO ADJ_NANO
+#endif
+
+#if defined(ADJ_TAI) && !defined(MOD_TAI)
+#define MOD_TAI ADJ_TAI
+#endif
+
 #ifndef NTP_SYSCALLS_LIBC
 #ifdef NTP_SYSCALLS_STD
 # define ntp_adjtime(t)		syscall(SYS_ntp_adjtime, (t))
 # define ntp_gettime(t)		syscall(SYS_ntp_gettime, (t))
 #else /* !NTP_SYSCALLS_STD */
 # ifdef HAVE___ADJTIMEX
-extern	int	__adjtimex	P((struct timex *));
+extern	int	__adjtimex	(struct timex *);
 
 #  define ntp_adjtime(t)	__adjtimex((t))
 

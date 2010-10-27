@@ -13,7 +13,7 @@ broadcast/multicast client, with all peers being determined by listening to
 broadcasts at run time.
 
 Usually, the configuration file is installed in the \fI/etc\fR directory, but 
-could be installed elsewhere (see the -c \fIconffile\fR command line option).  
+could be installed elsewhere (see the \-c \fIconffile\fR command line option).  
 The file format is similar to other Unix configuration files - comments begin 
 with a # character and extend to the end of the line; blank lines are ignored.
 
@@ -28,7 +28,7 @@ indefinite repetition of the last item before the [ ... ].
 
 Following is a description of the configuration commands in NTPv4.  There are 
 two classes of commands, configuration commands that configure an association 
-with a remote server, peer or reference clock, and auxilliary commands that 
+with a remote server, peer or reference clock, and auxiliary commands that 
 specify environmental variables that control various related operations.
 .SS "Configuration Commands"
 The various modes are determined by the command keyword and the required IP 
@@ -44,8 +44,8 @@ support of the IPv4 address family.  IPv6 addresses can be identified by the
 presence of colons ":" in the address field.  IPv6 addresses can be used 
 almost everywhere where IPv4 addresses can be used, with the exception of 
 reference clock addresses, which are always IPv4.  Note that in contexts where 
-a host name is expected, a -4 qualifier preceding the host name forces DNS 
-resolution to the IPv4 namespace, while a -6 qualifier forces DNS resolution 
+a host name is expected, a \-4 qualifier preceding the host name forces DNS 
+resolution to the IPv4 namespace, while a \-6 qualifier forces DNS resolution 
 to the IPv6 namespace.
 
 There are three types of associations: persistent, preemptable and ephemeral. 
@@ -157,6 +157,11 @@ h).  The minimum poll interval defaults to 6 (64 s), but can be decreased by
 the minpoll option to a lower limit of 4 (16 s).  These option are valid only 
 with the \fBserver\fR and \fBpeer\fR commands.
 .TP
+.B mode \fIoption\fR
+Pass the \fIoption\fR to a reference clock driver, where \fIoption\fR
+is an integer in the range from 0 to 255, inclusive. This option is
+valid only with type r addresses.
+.TP
 .B noselect 
 Marks the server as unused, except for display purposes.  The server is 
 discarded by the selection algorithm.  This option is valid only with the 
@@ -195,13 +200,10 @@ Specifies the version number to be used for outgoing NTP packets.  Versions
 1-4 are the choices, with version 4 the default.  This option is valid only 
 with the \fBserver\fR, \fBpeer\fR and \fBbroadcast\fR commands.
 .TP
-.B dynamic 
-Allows a server/peer to be configured even if it is not reachable at 
-configuration time.  It is assumed that at some point in the future the 
-network environment changes so that this server/peer can be reached.  This 
-option is useful to configure servers/peers on mobile systems with 
-intermittent network access (e.g. wlan clients).
-.SS "Auxilliary Commands"
+.B xleave
+Operate in interleaved mode (symmetric and broadcast modes only). (see
+NTP Interleaved Modes)
+.SS "Auxiliary Commands"
 .TP
 .B broadcastclient \fR[\fBnovolley\fR]
 This command enables reception of broadcast server messages to any local 
@@ -324,6 +326,24 @@ separate file.  Include files may be nested to a depth of five; upon reaching
 the end of any include file, command processing resumes in the previous 
 configuration file.  This option is useful for sites that run \fBntpd\fR on 
 multiple hosts, with (mostly) common options (e.g., a restriction list).
+.TP
+.B interface \fR[\fBlisten\fR | \fBignore\fR | \fBdrop\fR] [\fBall\fR | \fBipv4\fR | \fBipv6\fR | \fBwildcard\fR | \fIname\fR | \fIaddress\fR[/\fIprefixlen\fR]]
+This command controls which network addresses \fBntpd\fR opens, and
+whether input is dropped without processing. The first parameter
+determines the action for addresses which match the second
+parameter. That parameter specifies a class of addresses, or a
+specific interface name, or an address. In the address case,
+\fIprefixlen\fR determines how many bits must match for this rule to
+apply. \fBignore\fR prevents opening matching addresses, \fBdrop\fR
+causes \fBntpd\fR to open the address and drop all received packets
+without examination. Multiple \fBinterface\fR commands can be
+used. The last rule which matches a particular address determines the
+action for it. \fBinterface\fR commands are disabled if any \fB\-I\fR,
+\fB\-\-interface\fR, \fB\-L\fR, or \fB\-\-novirtualips\fR command-line
+options are used. If none of those options are used and no
+\fBinterface\fR actions are specified in the configuration file, all
+available network addresses are opened. The \fBnic\fR command is an
+alias for \fBinterface\fR.
 .SH FILES
 /etc/ntp.conf
 .SH NOTES

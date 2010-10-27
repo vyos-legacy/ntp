@@ -1,9 +1,9 @@
 /* -*- Mode: Text -*- */
 
 copyright = {
-    date  = "1970-2008";
+    date  = "1970-2010";
     owner = "David L. Mills and/or others";
-    eaddr = "http://bugs.ntp.isc.org, bugs@ntp.org";
+    eaddr = "http://bugs.ntp.org, bugs@ntp.org";
     type  = note;
     text  = "see html/copyright.html";
 };
@@ -16,3 +16,5 @@ version         = `
 eval VERSION=\`sed -e 's/.*,\\[//' -e 's/\\].*//' < ../version.m4\`
 [ -z "${VERSION}" ] && echo "Cannot determine VERSION" && kill -TERM $AG_pid
 echo $VERSION`;
+
+version-value = '';	/* Don't use -v as a shortcut for --version */

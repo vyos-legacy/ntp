@@ -1,55 +1,32 @@
 
 /*
- *  $Id: pgusage.c,v 4.12 2007/04/28 22:19:23 bkorb Exp $
- * Time-stamp:      "2006-07-16 08:13:26 bkorb"
+ *  $Id: da09fc943da953195b243b7697fdbf5127f5b6c2 $
+ * Time-stamp:      "2009-11-01 11:52:51 bkorb"
  *
  *   Automated Options Paged Usage module.
  *
  *  This routine will run run-on options through a pager so the
  *  user may examine, print or edit them at their leisure.
- */
-
-/*
- *  Automated Options copyright 1992-2007 Bruce Korb
  *
- *  Automated Options is free software.
- *  You may redistribute it and/or modify it under the terms of the
- *  GNU General Public License, as published by the Free Software
- *  Foundation; either version 2, or (at your option) any later version.
+ *  This file is part of AutoOpts, a companion to AutoGen.
+ *  AutoOpts is free software.
+ *  AutoOpts is copyright (c) 1992-2009 by Bruce Korb - all rights reserved
  *
- *  Automated Options is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  AutoOpts is available under any one of two licenses.  The license
+ *  in use must be one of these two and the choice is under the control
+ *  of the user of the license.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with Automated Options.  See the file "COPYING".  If not,
- *  write to:  The Free Software Foundation, Inc.,
- *             51 Franklin Street, Fifth Floor,
- *             Boston, MA  02110-1301, USA.
+ *   The GNU Lesser General Public License, version 3 or later
+ *      See the files "COPYING.lgplv3" and "COPYING.gplv3"
  *
- * As a special exception, Bruce Korb gives permission for additional
- * uses of the text contained in his release of AutoOpts.
+ *   The Modified Berkeley Software Distribution License
+ *      See the file "COPYING.mbsd"
  *
- * The exception is that, if you link the AutoOpts library with other
- * files to produce an executable, this does not by itself cause the
- * resulting executable to be covered by the GNU General Public License.
- * Your use of that executable is in no way restricted on account of
- * linking the AutoOpts library code into it.
+ *  These files have the following md5sums:
  *
- * This exception does not however invalidate any other reasons why
- * the executable file might be covered by the GNU General Public License.
- *
- * This exception applies only to the code released by Bruce Korb under
- * the name AutoOpts.  If you copy code from other sources under the
- * General Public License into a copy of AutoOpts, as the General Public
- * License permits, the exception does not apply to the code that you add
- * in this way.  To avoid misleading anyone as to the status of such
- * modified files, you must delete this exception notice from them.
- *
- * If you write modifications of your own for AutoOpts, it is your choice
- * whether to permit this exception to apply to your modifications.
- * If you do not wish that, delete this exception notice.
+ *  43b91e8ca915626ed3818ffb1b71248b pkg/libopts/COPYING.gplv3
+ *  06a1a2e4760c90ea5e1dad8dfaac4d39 pkg/libopts/COPYING.lgplv3
+ *  66a5cedaf62c4b2637025f049f9b826f pkg/libopts/COPYING.mbsd
  */
 
 tePagerState pagerState = PAGER_STATE_INITIAL;
@@ -64,11 +41,15 @@ tePagerState pagerState = PAGER_STATE_INITIAL;
  * doc:
  *  Run the usage output through a pager.
  *  This is very handy if it is very long.
+ *  This is disabled on platforms without a working fork() function.
 =*/
 void
 optionPagedUsage( tOptions* pOptions, tOptDesc* pOD )
 {
-#if defined(__windows__) && !defined(__CYGWIN__)
+#if ! defined(HAVE_WORKING_FORK)
+    if ((pOD->fOptState & OPTST_RESET) != 0)
+        return;
+
     (*pOptions->pUsageProc)( pOptions, EXIT_SUCCESS );
 #else
     static pid_t     my_pid;
@@ -82,6 +63,9 @@ optionPagedUsage( tOptions* pOptions, tOptDesc* pOD )
     switch (pagerState) {
     case PAGER_STATE_INITIAL:
     {
+        if ((pOD->fOptState & OPTST_RESET) != 0)
+            return;
+
         my_pid  = getpid();
 #ifdef HAVE_SNPRINTF
         snprintf(zPageUsage, sizeof(zPageUsage), "/tmp/use.%lu", (tAoUL)my_pid);
@@ -110,7 +94,7 @@ optionPagedUsage( tOptions* pOptions, tOptDesc* pOD )
          */
         (*pOptions->pUsageProc)( pOptions, EXIT_SUCCESS );
 
-        /*NOTREACHED*/
+        /* NOTREACHED */
         _exit( EXIT_FAILURE );
     }
 

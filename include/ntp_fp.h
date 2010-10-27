@@ -5,12 +5,6 @@
 #ifndef NTP_FP_H
 #define NTP_FP_H
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-
-#include "ntp_rfc2553.h"
-
 #include "ntp_types.h"
 
 /*
@@ -340,40 +334,38 @@ typedef u_int32 u_fp;
 /*
  * Prototypes
  */
-extern	char *	dofptoa		P((u_fp, int, short, int));
-extern	char *	dolfptoa	P((u_long, u_long, int, short, int));
+extern	char *	dofptoa		(u_fp, int, short, int);
+extern	char *	dolfptoa	(u_long, u_long, int, short, int);
 
-extern	int	atolfp		P((const char *, l_fp *));
-extern	int	buftvtots	P((const char *, l_fp *));
-extern	char *	fptoa		P((s_fp, short));
-extern	char *	fptoms		P((s_fp, short));
-extern	int	hextolfp	P((const char *, l_fp *));
-extern  void    gpstolfp        P((int, int, unsigned long, l_fp *));
-extern	int	mstolfp		P((const char *, l_fp *));
-extern	char *	prettydate	P((l_fp *));
-extern	char *	gmprettydate	P((l_fp *));
-extern	char *	uglydate	P((l_fp *));
-extern  void    mfp_mul         P((int32 *, u_int32 *, int32, u_int32, int32, u_int32));
+extern	int	atolfp		(const char *, l_fp *);
+extern	int	buftvtots	(const char *, l_fp *);
+extern	char *	fptoa		(s_fp, short);
+extern	char *	fptoms		(s_fp, short);
+extern	int	hextolfp	(const char *, l_fp *);
+extern  void    gpstolfp        (int, int, unsigned long, l_fp *);
+extern	int	mstolfp		(const char *, l_fp *);
+extern	char *	prettydate	(l_fp *);
+extern	char *	gmprettydate	(l_fp *);
+extern	char *	uglydate	(l_fp *);
+extern  void    mfp_mul         (int32 *, u_int32 *, int32, u_int32, int32, u_int32);
 
-extern	void	get_systime	P((l_fp *));
-extern	int	step_systime	P((double));
-extern	int	adj_systime	P((double));
+extern	void	get_systime	(l_fp *);
+extern	int	step_systime	(double);
+extern	int	adj_systime	(double);
 
-extern	struct tm * ntp2unix_tm P((u_long ntp, int local));
+extern	struct tm * ntp2unix_tm (u_long ntp, int local);
 
-#define	lfptoa(_fpv, _ndec)	mfptoa((_fpv)->l_ui, (_fpv)->l_uf, (_ndec))
-#define	lfptoms(_fpv, _ndec)	mfptoms((_fpv)->l_ui, (_fpv)->l_uf, (_ndec))
+#define	lfptoa(fpv, ndec)	mfptoa((fpv)->l_ui, (fpv)->l_uf, (ndec))
+#define	lfptoms(fpv, ndec)	mfptoms((fpv)->l_ui, (fpv)->l_uf, (ndec))
 
-#define stoa(_sin)	socktoa((_sin))
-#define stohost(_sin)	socktohost((_sin))
+#define stoa(addr)		socktoa(addr)
+#define	ntoa(addr)		stoa(addr)
+#define stohost(addr)		socktohost(addr)
 
-#define	ntoa(_sin)	stoa(_sin)
-#define	ntohost(_sin)	stohost(_sin)
-
-#define	ufptoa(_fpv, _ndec)	dofptoa((_fpv), 0, (_ndec), 0)
-#define	ufptoms(_fpv, _ndec)	dofptoa((_fpv), 0, (_ndec), 1)
-#define	ulfptoa(_fpv, _ndec)	dolfptoa((_fpv)->l_ui, (_fpv)->l_uf, 0, (_ndec), 0)
-#define	ulfptoms(_fpv, _ndec)	dolfptoa((_fpv)->l_ui, (_fpv)->l_uf, 0, (_ndec), 1)
-#define	umfptoa(_fpi, _fpf, _ndec) dolfptoa((_fpi), (_fpf), 0, (_ndec), 0)
+#define	ufptoa(fpv, ndec)	dofptoa((fpv), 0, (ndec), 0)
+#define	ufptoms(fpv, ndec)	dofptoa((fpv), 0, (ndec), 1)
+#define	ulfptoa(fpv, ndec)	dolfptoa((fpv)->l_ui, (fpv)->l_uf, 0, (ndec), 0)
+#define	ulfptoms(fpv, ndec)	dolfptoa((fpv)->l_ui, (fpv)->l_uf, 0, (ndec), 1)
+#define	umfptoa(fpi, fpf, ndec) dolfptoa((fpi), (fpf), 0, (ndec), 0)
 
 #endif /* NTP_FP_H */
