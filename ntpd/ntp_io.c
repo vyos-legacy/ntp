@@ -2751,6 +2751,13 @@ open_socket(
 	 * IPv6 specific options go here
 	 */
 	if (IS_IPV6(addr)) {
+#if defined(HAVE_IPTOS_SUPPORT)
+		if (setsockopt(fd, IPPROTO_IPV6, IPV6_TCLASS, (char *)&qos,
+			       sizeof(qos)))
+			msyslog(LOG_ERR,
+				"setsockopt IPV6_TCLASS (%02x) fails on address %s: %m",
+				qos, stoa(addr));
+#endif /* HAVE_IPTOS_SUPPORT */
 #if defined(IPV6_V6ONLY)
 		if (isc_net_probe_ipv6only() == ISC_R_SUCCESS
 		    && setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY,
