@@ -41,6 +41,8 @@ static char RCSid[] = "adjtimed.c,v 3.1 1993/07/06 01:04:45 jbj Exp";
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"
 
+#include "adjtime.h"
+
 double atof (const char *);
 
 int InitClockRate (void);

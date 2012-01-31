@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpd-opts.texi)
 # 
-# It has been AutoGen-ed  October 26, 2010 at 04:48:40 PM by AutoGen 5.10
+# It has been AutoGen-ed  July  9, 2010 at 02:24:03 AM by AutoGen 5.10
 # From the definitions    ntpd-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -80,12 +80,14 @@ USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
                                 authreq
    -b no  bcastsync      Allow us to sync to broadcast servers
    -c Str configfile     configuration file name
-   -d --- debug-level    this package was built using 'configure --disable--debug'
-   -D --- set-debug-level this package was built using 'configure --disable--debug'
+   -d no  debug-level    Increase output debug message level
+                                - may appear multiple times
+   -D Str set-debug-level Set the output debug message level
+                                - may appear multiple times
    -f Str driftfile      frequency drift file name
    -g no  panicgate      Allow the first adjustment to be Big
                                 - may appear multiple times
-   -i Str jaildir        Jail directory
+   -i --- jaildir        built without --enable-clockctl or --enable-linuxcaps
    -I Str interface      Listen on an interface name or address
                                 - may appear multiple times
    -k Str keyfile        path to symmetric keys
@@ -101,7 +103,7 @@ USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
    -s Str statsdir       Statistics file location
    -t Str trustedkey     Trusted key number
                                 - may appear multiple times
-   -u Str user           Run as userid (or userid:groupid)
+   -u --- user           built without --enable-clockctl or --enable-linuxcaps
    -U Num updateinterval interval in seconds between scans for new or dropped interfaces
       Str var            make ARG an ntp variable (RW)
                                 - may appear multiple times
