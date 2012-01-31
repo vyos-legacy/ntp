@@ -1,3 +1,11 @@
+ntp (1:4.2.6.p2+dfsg-1+vyatta+1) unstable; urgency=low
+
+  * ntpd: set transport class for IPv6
+  * Merge ntp from Debian 6.0.4
+  * update .gitignore
+
+ -- Stephen Hemminger <shemminger@vyatta.com>  Tue, 31 Jan 2012 09:41:50 -0800
+
 ntp (4.2.6p2+dfsg+vyatta-4) unstable; urgency=low
 
   * new branch
