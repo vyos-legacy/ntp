@@ -2,7 +2,7 @@ Source: ntp
 Section: net
 Priority: optional
 Maintainer: Vyatta Package Maintainers <maintainers@vyatta.com>
-Build-Depends: debhelper (>= 6),
+Build-Depends: debhelper (>= 6), lynx,
  libedit-dev, libcap2-dev, libssl-dev (>= 0.9), autogen
 Build-Conflicts: libavahi-compat-libdnssd-dev, libwww-dev, libwww-ssl-dev
 Standards-Version: 3.8.1
