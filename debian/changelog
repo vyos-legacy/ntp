@@ -1,3 +1,9 @@
+ntp (1:4.2.6.p2+dfsg-1+vyatta+3) unstable; urgency=low
+
+  * manually force rebuild
+
+ -- Stephen Hemminger <stephen.hemminger@vyatta.com>  Thu, 02 Feb 2012 13:31:15 -0800
+
 ntp (1:4.2.6.p2+dfsg-1+vyatta+2) unstable; urgency=low
 
   * fix dependency on lynx
