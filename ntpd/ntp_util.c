@@ -537,8 +537,8 @@ stats_config(
 			    value);
 			break;
 		}
-		fprintf(fp, "%d", (int)getpid());
-		fclose(fp);;
+		fprintf(fp, "%d\n", (int)getpid());
+		fclose(fp);
 		break;
 
 	/*
