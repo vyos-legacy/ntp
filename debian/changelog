@@ -1,3 +1,10 @@
+ntp (1:4.2.6.p2+dfsg-1+vyatta+4) unstable; urgency=low
+
+  * ntpd: add new line at end of pid file
+  * check before killing daemon
+
+ -- Stephen Hemminger <shemminger@vyatta.com>  Tue, 21 Feb 2012 13:54:20 -0800
+
 ntp (1:4.2.6.p2+dfsg-1+vyatta+3) unstable; urgency=low
 
   * manually force rebuild
