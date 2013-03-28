@@ -17,8 +17,6 @@ Makefile
 build-stamp
 config.h
 config.status
-config.guess
-config.sub
 libtool
 .gcc-warning
 *.loT
