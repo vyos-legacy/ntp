@@ -1,3 +1,9 @@
+ntp (1:4.2.6.p2+dfsg-1+vyos2+lithium1) unstable; urgency=low
+
+  * New branch
+
+ -- Alex Harpin <development@landsofshadow.co.uk>  Sun, 14 Dec 2014 11:08:53 +0000
+ 
 ntp (1:4.2.6.p2+dfsg-1+vyos1+helium1) unstable; urgency=low
 
   * New branch
