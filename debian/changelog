@@ -1,3 +1,13 @@
+ntp (1:4.2.6.p2+dfsg-1+vyos1+helium2) unstable; urgency=low
+
+  [ Alex Harpin ]
+  * ntp: import RedHat patch to fix CVE-2014-9293
+  * ntp: import RedHat patch to fix CVE-2014-9294
+  * ntp: import RedHat patch to fix CVE-2014-9295
+  * ntp: import RedHat patch to fix CVE-2014-9296
+
+ -- Alex Harpin <development@landsofshadow.co.uk>  Fri, 26 Dec 2014 10:37:05 +0000
+
 ntp (1:4.2.6.p2+dfsg-1+vyos1+helium1) unstable; urgency=low
 
   * New branch
